@@ -692,7 +692,7 @@ function AssumptionsSection() {
         <div className="p-2 bg-slate-100 rounded-lg border border-slate-200">
           <FileText className="w-6 h-6 text-slate-700" />
         </div>
-        <h2 className="text-2xl font-bold text-slate-900">Cost Assumptions (Protected)</h2>
+        <h2 className="text-2xl font-bold text-slate-900">Cost Assumptions</h2>
       </div>
       <p className="text-sm text-slate-600 mb-6">
         Industry benchmarks tailored for Indian healthcare. Values are protected to maintain consistency.
