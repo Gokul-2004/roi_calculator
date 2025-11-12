@@ -160,6 +160,7 @@ The calculator uses industry benchmarks for Indian healthcare:
 - Staff Hourly Cost: ₹200
 - Document Loss Rate: 2%
 - Compliance Costs: ₹100,000 (paper) vs ₹20,000 (e-signature)
+- Compliance & DPDP Penalties: ₹50,000 (paper) vs ₹5,000 (e-signature)
 
 These values are defined in `web-app/lib/calculations.ts` and can be modified if needed.
 

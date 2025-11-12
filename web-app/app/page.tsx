@@ -567,6 +567,18 @@ function CostBreakdownSection({ costs }: { costs: AnnualCosts }) {
           esig={costs.software_subscription}
           savings={-costs.software_subscription}
         />
+        <CostItem
+          label="Patient Signature Denial (Opportunity Cost)"
+          paper={costs.patient_denial_cost_paper}
+          esig={costs.patient_denial_cost_esig}
+          savings={costs.patient_denial_savings}
+        />
+        <CostItem
+          label="Compliance, Audit & DPDP Penalties"
+          paper={costs.compliance_dpdp_penalty_paper}
+          esig={costs.compliance_dpdp_penalty_esig}
+          savings={costs.compliance_dpdp_penalty_savings}
+        />
       </div>
 
       {/* Summary Cards - Combined Total with Descriptions */}
@@ -598,17 +610,26 @@ function CostItem({
   savings,
 }: {
   label: string;
-  paper: number;
-  esig: number;
-  savings: number;
+  paper: number | null;
+  esig: number | null;
+  savings: number | null;
 }) {
+  const formatValue = (value: number | null) =>
+    value === null ? '—' : formatCurrency(value);
+  const savingsClass =
+    savings === null
+      ? 'text-slate-500'
+      : savings >= 0
+      ? 'text-green-600'
+      : 'text-red-600';
+
   return (
     <div className="grid grid-cols-4 gap-4 p-5 bg-white border border-slate-200 rounded-lg items-center hover:border-slate-300 hover:shadow-sm transition-all duration-200">
       <div className="font-semibold text-slate-900">{label}</div>
-      <div className="text-slate-700 text-right font-semibold">{formatCurrency(paper)}</div>
-      <div className="text-slate-700 text-right font-semibold">{formatCurrency(esig)}</div>
-      <div className={`text-right font-bold text-lg ${savings >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-        {formatCurrency(savings)}
+      <div className="text-slate-700 text-right font-semibold">{formatValue(paper)}</div>
+      <div className="text-slate-700 text-right font-semibold">{formatValue(esig)}</div>
+      <div className={`text-right font-bold text-lg ${savingsClass}`}>
+        {savings === null ? '—' : formatCurrency(savings)}
       </div>
     </div>
   );

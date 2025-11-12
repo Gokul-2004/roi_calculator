@@ -19,6 +19,8 @@ export interface CostAssumptions {
   paper_compliance_cost: number;
   esig_time_per_doc: number;
   esig_compliance_cost: number;
+  paper_dpdp_penalty: number;
+  esig_dpdp_penalty: number;
 }
 
 export interface AnnualCosts {
@@ -27,6 +29,12 @@ export interface AnnualCosts {
   paper_staff_time: number;
   doc_loss_recreation: number;
   paper_compliance_audit: number;
+  patient_denial_cost_paper: number | null;
+  patient_denial_cost_esig: number | null;
+  patient_denial_savings: number | null;
+  compliance_dpdp_penalty_paper: number;
+  compliance_dpdp_penalty_esig: number;
+  compliance_dpdp_penalty_savings: number;
   total_paper_cost: number;
   esig_staff_time: number;
   esig_compliance_audit: number;
@@ -61,6 +69,8 @@ export const COST_ASSUMPTIONS: CostAssumptions = {
   paper_compliance_cost: 100000,
   esig_time_per_doc: 2,
   esig_compliance_cost: 20000,
+  paper_dpdp_penalty: 50000,
+  esig_dpdp_penalty: 5000,
 };
 
 export function calculateAnnualCosts(
@@ -82,17 +92,25 @@ export function calculateAnnualCosts(
   const docLossCost =
     docsPerYear * lossRate * (pagesPerDoc * costAssumptions.paper_cost_per_page);
   const paperCompliance = costAssumptions.paper_compliance_cost;
+  const paperDpdpPenalty = costAssumptions.paper_dpdp_penalty;
 
   const totalPaperCost =
-    paperPrinting + storageCost + paperStaffCost + docLossCost + paperCompliance;
+    paperPrinting +
+    storageCost +
+    paperStaffCost +
+    docLossCost +
+    paperCompliance +
+    paperDpdpPenalty;
 
   // E-Signature Costs
   const esigStaffCost =
     docsPerYear * (costAssumptions.esig_time_per_doc / 60) * costAssumptions.staff_hourly_cost;
   const esigCompliance = costAssumptions.esig_compliance_cost;
   const softwareSubscription = esig_annual_cost;
+  const esigDpdpPenalty = costAssumptions.esig_dpdp_penalty;
 
-  const totalEsigCost = esigStaffCost + esigCompliance + softwareSubscription;
+  const totalEsigCost =
+    esigStaffCost + esigCompliance + softwareSubscription + esigDpdpPenalty;
   const annualSavings = totalPaperCost - totalEsigCost;
 
   return {
@@ -101,6 +119,12 @@ export function calculateAnnualCosts(
     paper_staff_time: paperStaffCost,
     doc_loss_recreation: docLossCost,
     paper_compliance_audit: paperCompliance,
+    patient_denial_cost_paper: null,
+    patient_denial_cost_esig: null,
+    patient_denial_savings: null,
+    compliance_dpdp_penalty_paper: paperDpdpPenalty,
+    compliance_dpdp_penalty_esig: esigDpdpPenalty,
+    compliance_dpdp_penalty_savings: paperDpdpPenalty - esigDpdpPenalty,
     total_paper_cost: totalPaperCost,
     esig_staff_time: esigStaffCost,
     esig_compliance_audit: esigCompliance,
