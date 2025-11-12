@@ -19,8 +19,8 @@ export interface CostAssumptions {
   paper_compliance_cost: number;
   esig_time_per_doc: number;
   esig_compliance_cost: number;
-  paper_dpdp_penalty: number;
-  esig_dpdp_penalty: number;
+  paper_dpdp_penalty: number | null;
+  esig_dpdp_penalty: number | null;
 }
 
 export interface AnnualCosts {
@@ -32,9 +32,9 @@ export interface AnnualCosts {
   patient_denial_cost_paper: number | null;
   patient_denial_cost_esig: number | null;
   patient_denial_savings: number | null;
-  compliance_dpdp_penalty_paper: number;
-  compliance_dpdp_penalty_esig: number;
-  compliance_dpdp_penalty_savings: number;
+  compliance_dpdp_penalty_paper: number | null;
+  compliance_dpdp_penalty_esig: number | null;
+  compliance_dpdp_penalty_savings: number | null;
   total_paper_cost: number;
   esig_staff_time: number;
   esig_compliance_audit: number;
@@ -69,8 +69,8 @@ export const COST_ASSUMPTIONS: CostAssumptions = {
   paper_compliance_cost: 100000,
   esig_time_per_doc: 2,
   esig_compliance_cost: 20000,
-  paper_dpdp_penalty: 50000,
-  esig_dpdp_penalty: 5000,
+  paper_dpdp_penalty: null,
+  esig_dpdp_penalty: null,
 };
 
 export function calculateAnnualCosts(
@@ -100,7 +100,7 @@ export function calculateAnnualCosts(
     paperStaffCost +
     docLossCost +
     paperCompliance +
-    paperDpdpPenalty;
+    (paperDpdpPenalty ?? 0);
 
   // E-Signature Costs
   const esigStaffCost =
@@ -110,7 +110,7 @@ export function calculateAnnualCosts(
   const esigDpdpPenalty = costAssumptions.esig_dpdp_penalty;
 
   const totalEsigCost =
-    esigStaffCost + esigCompliance + softwareSubscription + esigDpdpPenalty;
+    esigStaffCost + esigCompliance + softwareSubscription + (esigDpdpPenalty ?? 0);
   const annualSavings = totalPaperCost - totalEsigCost;
 
   return {
@@ -124,7 +124,10 @@ export function calculateAnnualCosts(
     patient_denial_savings: null,
     compliance_dpdp_penalty_paper: paperDpdpPenalty,
     compliance_dpdp_penalty_esig: esigDpdpPenalty,
-    compliance_dpdp_penalty_savings: paperDpdpPenalty - esigDpdpPenalty,
+    compliance_dpdp_penalty_savings:
+      paperDpdpPenalty !== null && esigDpdpPenalty !== null
+        ? paperDpdpPenalty - esigDpdpPenalty
+        : null,
     total_paper_cost: totalPaperCost,
     esig_staff_time: esigStaffCost,
     esig_compliance_audit: esigCompliance,

@@ -118,7 +118,7 @@ export default function Home() {
               <div>
                 <h1 className="text-3xl font-bold text-slate-900">
                   ROI Calculator
-                </h1>
+          </h1>
                 <p className="text-sm font-medium text-slate-600 mt-1">
                   Paper-Based vs E-Signature Solution • Indian Healthcare Sector
                 </p>
@@ -304,6 +304,9 @@ export default function Home() {
                 
                 {/* ROI Metrics */}
                 <ROIMetricsSection metrics={results.roiMetrics} />
+                
+                {/* Cost Assumptions */}
+                <AssumptionsSection />
                 
                 {/* Benefits */}
                 <BenefitsSection benefits={results.benefits} />
@@ -524,6 +527,25 @@ function CostBreakdownSection({ costs }: { costs: AnnualCosts }) {
       </div>
 
       {/* Detailed Breakdown */}
+      {/* Summary Cards - Combined Total with Descriptions */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="p-6 bg-slate-800 rounded-lg border-2 border-slate-700 shadow-xl">
+          <p className="text-sm font-semibold mb-2 text-slate-300">Paper-Based</p>
+          <p className="text-3xl font-bold text-white mb-2">{formatCurrency(costs.total_paper_cost)}</p>
+          <p className="text-xs text-slate-400">Total annual cost</p>
+        </div>
+        <div className="p-6 bg-slate-800 rounded-lg border-2 border-slate-700 shadow-xl">
+          <p className="text-sm font-semibold mb-2 text-slate-300">E-Signature</p>
+          <p className="text-3xl font-bold text-white mb-2">{formatCurrency(costs.total_esig_cost)}</p>
+          <p className="text-xs text-slate-400">Total annual cost</p>
+        </div>
+        <div className="p-6 bg-slate-800 rounded-lg border-2 border-slate-700 shadow-xl">
+          <p className="text-sm font-semibold mb-2 text-slate-300">Annual Savings</p>
+          <p className="text-3xl font-bold text-emerald-400 mb-2">{formatCurrency(costs.annual_savings)}</p>
+          <p className="text-xs text-slate-400">You save this much!</p>
+        </div>
+      </div>
+
       <div className="space-y-3">
         <div className="grid grid-cols-4 gap-4 p-4 bg-slate-100 rounded-lg font-semibold text-sm text-slate-800 border border-slate-200">
           <div>Cost Component</div>
@@ -580,23 +602,122 @@ function CostBreakdownSection({ costs }: { costs: AnnualCosts }) {
           savings={costs.compliance_dpdp_penalty_savings}
         />
       </div>
+    </div>
+  );
+}
 
-      {/* Summary Cards - Combined Total with Descriptions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-        <div className="p-6 bg-slate-800 rounded-lg border-2 border-slate-700 shadow-xl">
-          <p className="text-sm font-semibold mb-2 text-slate-300">Paper-Based</p>
-          <p className="text-3xl font-bold text-white mb-2">{formatCurrency(costs.total_paper_cost)}</p>
-          <p className="text-xs text-slate-400">Total annual cost</p>
+function AssumptionsSection() {
+  const formatValue = (
+    value: number | null,
+    type: 'currency' | 'minutes' | 'percent'
+  ) => {
+    if (value === null) {
+      return '—';
+    }
+    if (type === 'currency') {
+      return value.toLocaleString('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+    }
+    return value.toFixed(2);
+  };
+
+  const items = [
+    {
+      label: 'Paper Cost per Page',
+      value: formatValue(COST_ASSUMPTIONS.paper_cost_per_page, 'currency'),
+      unit: '₹',
+      notes: 'A4 paper cost including printing',
+    },
+    {
+      label: 'Storage Cost per Document per Year',
+      value: formatValue(COST_ASSUMPTIONS.storage_cost_per_doc, 'currency'),
+      unit: '₹',
+      notes: 'Physical archival and retrieval costs',
+    },
+    {
+      label: 'Staff Time per Document (Paper)',
+      value: formatValue(COST_ASSUMPTIONS.paper_time_per_doc, 'minutes'),
+      unit: 'minutes',
+      notes: 'Time for printing, handling, manual filing',
+    },
+    {
+      label: 'Average Staff Hourly Cost',
+      value: formatValue(COST_ASSUMPTIONS.staff_hourly_cost, 'currency'),
+      unit: '₹',
+      notes: 'Blended rate for document handlers',
+    },
+    {
+      label: 'Document Loss/Re-creation Rate',
+      value: formatValue(COST_ASSUMPTIONS.document_loss_rate, 'percent'),
+      unit: '%',
+      notes: 'Documents lost or requiring recreation',
+    },
+    {
+      label: 'Compliance Audit Cost per Year (Paper)',
+      value: formatValue(COST_ASSUMPTIONS.paper_compliance_cost, 'currency'),
+      unit: '₹',
+      notes: 'Manual audit and compliance costs',
+    },
+    {
+      label: 'E-Signature Staff Time per Document',
+      value: formatValue(COST_ASSUMPTIONS.esig_time_per_doc, 'minutes'),
+      unit: 'minutes',
+      notes: 'Time for digital signing process',
+    },
+    {
+      label: 'E-Signature Compliance Cost per Year',
+      value: formatValue(COST_ASSUMPTIONS.esig_compliance_cost, 'currency'),
+      unit: '₹',
+      notes: 'Digital audit and compliance costs',
+    },
+    {
+      label: 'Potential DPDP Non Compliance Penalty (Non-Compliant/Year)',
+      value: formatValue(COST_ASSUMPTIONS.paper_dpdp_penalty, 'currency'),
+      unit: '₹',
+      notes: 'Potential DPDP Act non-compliance costs',
+    },
+    {
+      label: 'DPDP Compliance Costs (Compliant/Year)',
+      value: formatValue(COST_ASSUMPTIONS.esig_dpdp_penalty, 'currency'),
+      unit: '₹',
+      notes: 'Minimal compliance cost with e-signature audit trail',
+    },
+  ];
+
+  return (
+    <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-8">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 bg-slate-100 rounded-lg border border-slate-200">
+          <FileText className="w-6 h-6 text-slate-700" />
         </div>
-        <div className="p-6 bg-slate-800 rounded-lg border-2 border-slate-700 shadow-xl">
-          <p className="text-sm font-semibold mb-2 text-slate-300">E-Signature</p>
-          <p className="text-3xl font-bold text-white mb-2">{formatCurrency(costs.total_esig_cost)}</p>
-          <p className="text-xs text-slate-400">Total annual cost</p>
+        <h2 className="text-2xl font-bold text-slate-900">Cost Assumptions (Protected)</h2>
+      </div>
+      <p className="text-sm text-slate-600 mb-6">
+        Industry benchmarks tailored for Indian healthcare. Values are protected to maintain consistency.
+      </p>
+      <div className="border border-slate-200 rounded-lg overflow-hidden">
+        <div className="grid grid-cols-4 gap-4 bg-slate-100 px-4 py-3 text-xs font-semibold text-slate-700">
+          <div>Cost Component</div>
+          <div className="text-right">Value</div>
+          <div className="text-center">Unit</div>
+          <div>Notes</div>
         </div>
-        <div className="p-6 bg-slate-800 rounded-lg border-2 border-slate-700 shadow-xl">
-          <p className="text-sm font-semibold mb-2 text-slate-300">Annual Savings</p>
-          <p className="text-3xl font-bold text-emerald-400 mb-2">{formatCurrency(costs.annual_savings)}</p>
-          <p className="text-xs text-slate-400">You save this much!</p>
+        <div className="divide-y divide-slate-200">
+          {items.map((item) => (
+            <div
+              key={item.label}
+              className="grid grid-cols-4 gap-4 px-4 py-4 text-sm items-center"
+            >
+              <div className="font-medium text-slate-900">{item.label}</div>
+              <div className="text-right text-slate-700 font-semibold">{item.value}</div>
+              <div className="text-center text-slate-600 text-xs font-semibold uppercase">
+                {item.unit}
+              </div>
+              <div className="text-slate-600 text-xs leading-relaxed">{item.notes}</div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
