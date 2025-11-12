@@ -170,7 +170,18 @@ export function calculateBenefits(inputParams: InputParams): Benefits {
 }
 
 export function formatCurrency(value: number): string {
-  return `₹ ${value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const crore = 10000000; // 1 crore = 10,000,000
+  const lakh = 100000; // 1 lakh = 100,000
+
+  if (Math.abs(value) >= crore) {
+    const crores = value / crore;
+    return `₹ ${crores.toFixed(2)} Cr`;
+  } else if (Math.abs(value) >= lakh) {
+    const lakhs = value / lakh;
+    return `₹ ${lakhs.toFixed(2)} L`;
+  } else {
+    return `₹ ${value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
 }
 
 export function formatNumber(value: number): string {

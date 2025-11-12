@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Calculator, Save, TrendingUp, DollarSign, Clock, FileText, Zap, CheckCircle2, Users, AlertCircle, Activity, Building2, Shield, FileCheck, Database } from 'lucide-react';
+import { Calculator, Save, TrendingUp, DollarSign, Clock, FileText, Zap, CheckCircle2, Check, Users, AlertCircle, Activity, Building2, Shield, FileCheck, Database, X, RefreshCw } from 'lucide-react';
 import {
   calculateAnnualCosts,
   calculateROIMetrics,
@@ -13,6 +13,7 @@ import {
   type AnnualCosts,
   type ROIMetrics,
   type Benefits,
+  type CostAssumptions,
 } from '@/lib/calculations';
 import { saveCalculation, loadCalculations, deleteCalculation, type SavedCalculation } from '@/lib/supabase-helpers';
 
@@ -26,8 +27,52 @@ const DEFAULT_INPUTS: InputParams = {
   implementation_timeline_months: 3,
 };
 
+function TypewriterText({ text, speed = 100 }: { text: string; speed?: number }) {
+  const [displayedText, setDisplayedText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [charIndex, setCharIndex] = useState(0);
+
+  useEffect(() => {
+    // Reset when component mounts
+    setDisplayedText('');
+    setIsDeleting(false);
+    setCharIndex(0);
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!isDeleting) {
+        if (charIndex < text.length) {
+          setDisplayedText(text.slice(0, charIndex + 1));
+          setCharIndex(charIndex + 1);
+        } else {
+          // Wait 10 seconds before starting to delete
+          setTimeout(() => setIsDeleting(true), 10000);
+        }
+      } else {
+        if (charIndex > 0) {
+          setDisplayedText(text.slice(0, charIndex - 1));
+          setCharIndex(charIndex - 1);
+        } else {
+          setIsDeleting(false);
+        }
+      }
+    }, isDeleting ? speed / 2 : speed); // Delete faster than typing
+
+    return () => clearTimeout(timer);
+  }, [charIndex, isDeleting, text, speed]);
+
+  return (
+    <span className="inline-block min-w-[600px] text-left">
+      {displayedText}
+      <span className="animate-pulse">|</span>
+    </span>
+  );
+}
+
 export default function Home() {
   const [inputs, setInputs] = useState<InputParams>(DEFAULT_INPUTS);
+  const [costAssumptions, setCostAssumptions] = useState<CostAssumptions>(COST_ASSUMPTIONS);
   const [results, setResults] = useState<{
     annualCosts: AnnualCosts;
     roiMetrics: ROIMetrics;
@@ -50,22 +95,22 @@ export default function Home() {
   };
 
   const handleCalculate = () => {
-    const annualCosts = calculateAnnualCosts(inputs, COST_ASSUMPTIONS);
+    const annualCosts = calculateAnnualCosts(inputs, costAssumptions);
     const roiMetrics = calculateROIMetrics(inputs, annualCosts);
     const benefits = calculateBenefits(inputs);
     setResults({ annualCosts, roiMetrics, benefits });
   };
 
-  // Auto-calculate when inputs change (after first calculation)
+  // Auto-calculate when inputs or assumptions change (after first calculation)
   useEffect(() => {
     if (results) {
-      const annualCosts = calculateAnnualCosts(inputs, COST_ASSUMPTIONS);
+      const annualCosts = calculateAnnualCosts(inputs, costAssumptions);
       const roiMetrics = calculateROIMetrics(inputs, annualCosts);
       const benefits = calculateBenefits(inputs);
       setResults({ annualCosts, roiMetrics, benefits });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputs]);
+  }, [inputs, costAssumptions]);
 
   const handleSave = async () => {
     if (!saveName.trim() || !results) return;
@@ -112,7 +157,7 @@ export default function Home() {
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-slate-800 rounded-lg shadow-md">
+              <div className="p-3 bg-[#0072AA] rounded-lg shadow-md">
                 <Calculator className="w-7 h-7 text-white" />
               </div>
               <div>
@@ -120,7 +165,7 @@ export default function Home() {
                   ROI Calculator
           </h1>
                 <p className="text-sm font-medium text-slate-600 mt-1">
-                  Paper-Based vs E-Signature Solution • Indian Healthcare Sector
+                  Paper-Based vs E-Signature Solution
                 </p>
               </div>
             </div>
@@ -193,7 +238,7 @@ export default function Home() {
                           <div className="flex gap-2">
                             <button
                               onClick={() => handleLoad(calc)}
-                              className="flex-1 text-xs px-2 py-1.5 bg-slate-700 text-white rounded hover:bg-slate-800 font-medium transition"
+                              className="flex-1 text-xs px-2 py-1.5 bg-[#0072AA] text-white rounded hover:bg-[#005A87] font-medium transition"
                             >
                               Load
                             </button>
@@ -211,17 +256,20 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-slate-100 border border-slate-300 rounded-full">
-                <div className="w-2 h-2 bg-emerald-600 rounded-full"></div>
-                <span className="text-sm font-semibold text-slate-700">Live Calculator</span>
-              </div>
+              <button
+                onClick={handleCalculate}
+                className="hidden md:flex items-center gap-2 px-4 py-2 bg-[#0072AA] text-white border border-[#005A87] rounded-full hover:bg-[#005A87] transition-all duration-200 shadow-md hover:shadow-lg"
+              >
+                <RefreshCw className="w-4 h-4" />
+                <span className="text-sm font-semibold">Refresh</span>
+              </button>
             </div>
           </div>
         </div>
       </header>
 
       {/* Left Sidebar - Input Parameters (Fixed - Doesn't scroll) */}
-      <aside className="hidden lg:block fixed left-0 top-24 bottom-0 w-[420px] bg-white border-r border-slate-200 shadow-lg z-40 overflow-y-auto">
+      <aside className="hidden lg:block fixed left-0 top-24 bottom-0 w-[357px] bg-white border-r border-slate-200 shadow-lg z-40 overflow-y-auto">
         <div className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2 bg-slate-100 rounded-lg border border-slate-200">
@@ -284,7 +332,7 @@ export default function Home() {
           </div>
           <button
             onClick={handleCalculate}
-            className="mt-6 w-full bg-slate-800 text-white py-3 px-6 rounded-lg font-bold hover:bg-slate-900 transition-all duration-200 shadow-md hover:shadow-lg"
+            className="mt-6 w-full bg-[#0072AA] text-white py-3 px-6 rounded-lg font-bold hover:bg-[#005A87] transition-all duration-200 shadow-md hover:shadow-lg"
           >
             <Calculator className="w-5 h-5 inline mr-2" />
             Calculate ROI
@@ -293,20 +341,26 @@ export default function Home() {
       </aside>
 
       {/* Right Side - Results (Scrollable) */}
-      <div className="lg:pl-[420px]">
+      <div className="lg:pl-[357px]">
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <main className="space-y-6">
             {/* Results */}
             {results ? (
               <>
+                {/* Intro Text */}
+                <div className="text-2xl font-light text-center mb-6 italic" style={{ 
+                  color: '#21AA47',
+                }}>
+                  How much could you be saving with a <span className="font-bold not-italic">Certinal Digital Signing</span> solution? Try our eSignature ROI calculator below and find out.
+                </div>
+                
                 {/* Cost Breakdown */}
-                <CostBreakdownSection costs={results.annualCosts} />
-                
-                {/* ROI Metrics */}
-                <ROIMetricsSection metrics={results.roiMetrics} />
-                
-                {/* Cost Assumptions */}
-                <AssumptionsSection />
+                <CostBreakdownSection 
+                  costs={results.annualCosts} 
+                  metrics={results.roiMetrics}
+                  costAssumptions={costAssumptions}
+                  setCostAssumptions={setCostAssumptions}
+                />
                 
                 {/* Benefits */}
                 <BenefitsSection benefits={results.benefits} />
@@ -351,7 +405,7 @@ export default function Home() {
                     <button
                       onClick={handleSave}
                       disabled={!saveName.trim() || isSaving}
-                      className="px-8 py-3 bg-slate-800 text-white rounded-lg font-bold hover:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
+                      className="px-8 py-3 bg-[#0072AA] text-white rounded-lg font-bold hover:bg-[#005A87] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
                     >
                       {isSaving ? 'Saving...' : '💾 Save'}
                     </button>
@@ -433,7 +487,7 @@ export default function Home() {
           </div>
           <button
             onClick={handleCalculate}
-            className="mt-6 w-full bg-slate-800 text-white py-3 px-6 rounded-lg font-bold hover:bg-slate-900 transition-all duration-200 shadow-md hover:shadow-lg"
+            className="mt-6 w-full bg-[#0072AA] text-white py-3 px-6 rounded-lg font-bold hover:bg-[#005A87] transition-all duration-200 shadow-md hover:shadow-lg"
           >
             <Calculator className="w-5 h-5 inline mr-2" />
             Calculate ROI
@@ -516,93 +570,397 @@ function SliderField({
   );
 }
 
-function CostBreakdownSection({ costs }: { costs: AnnualCosts }) {
+function CostBreakdownSection({ 
+  costs, 
+  metrics, 
+  costAssumptions, 
+  setCostAssumptions 
+}: { 
+  costs: AnnualCosts; 
+  metrics: ROIMetrics;
+  costAssumptions: CostAssumptions;
+  setCostAssumptions: (assumptions: CostAssumptions) => void;
+}) {
+  const [showModal, setShowModal] = useState(false);
+  const [showAssumptionsModal, setShowAssumptionsModal] = useState(false);
+  const [isEditingAssumptions, setIsEditingAssumptions] = useState(false);
+  const [editableAssumptions, setEditableAssumptions] = useState<CostAssumptions>(costAssumptions);
+
+  // Sync editable assumptions when modal opens
+  useEffect(() => {
+    if (showAssumptionsModal) {
+      setEditableAssumptions(costAssumptions);
+      setIsEditingAssumptions(false);
+    }
+  }, [showAssumptionsModal, costAssumptions]);
+
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-8">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="p-2 bg-slate-100 rounded-lg border border-slate-200">
-          <DollarSign className="w-6 h-6 text-slate-700" />
+    <>
+      <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-8">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="p-2 bg-slate-100 rounded-lg border border-slate-200">
+            <span className="text-2xl font-bold text-slate-700">₹</span>
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900">Annual Cost Breakdown</h2>
         </div>
-        <h2 className="text-2xl font-bold text-slate-900">Annual Cost Breakdown</h2>
+
+        {/* Summary Cards - Combined Total with Descriptions */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="p-6 bg-[#0072AA] rounded-lg border-2 border-[#005A87] shadow-xl text-center">
+            <p className="text-sm font-semibold mb-2 text-slate-300">Paper-Based</p>
+            <p className="text-3xl font-bold mb-2" style={{ color: '#21AA47' }}>{formatCurrency(costs.total_paper_cost)}</p>
+            <p className="text-xs text-slate-400">Total annual cost</p>
+          </div>
+          <div className="p-6 bg-[#0072AA] rounded-lg border-2 border-[#005A87] shadow-xl text-center">
+            <p className="text-sm font-semibold mb-2 text-slate-300">E-Signature</p>
+            <p className="text-3xl font-bold mb-2" style={{ color: '#21AA47' }}>{formatCurrency(costs.total_esig_cost)}</p>
+            <p className="text-xs text-slate-400">Total annual cost</p>
+          </div>
+          <div className="p-6 bg-[#0072AA] rounded-lg border-2 border-[#005A87] shadow-xl text-center">
+            <p className="text-sm font-semibold mb-2 text-slate-300">Annual Savings</p>
+            <p className="text-3xl font-bold mb-2" style={{ color: '#21AA47' }}>{formatCurrency(costs.annual_savings)}</p>
+            <p className="text-xs text-slate-400">You save this much!</p>
+          </div>
+        </div>
+
+        {/* ROI Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <MetricCard
+            title="Net Benefit - Year 1"
+            value={formatCurrency(metrics.net_benefit_year1)}
+            subtitle="Savings minus implementation"
+            color="slate"
+          />
+          <MetricCard
+            title="Year 1 ROI (%)"
+            value={`${metrics.year1_roi_percent.toFixed(1)}%`}
+            subtitle="First year return"
+            color="slate"
+          />
+          <MetricCard
+            title="Year 5 ROI (%)"
+            value={`${metrics.year5_roi_percent.toFixed(1)}%`}
+            subtitle="Cumulative 5 years"
+            color="slate"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div className="p-6 bg-[#0072AA] rounded-lg border-2 border-[#005A87] shadow-xl text-center">
+            <p className="text-sm font-semibold mb-2 text-slate-300">3 Years Net Savings</p>
+            <p className="text-3xl font-bold mb-2" style={{ color: '#21AA47' }}>{formatCurrency(metrics.net_savings_3_years)}</p>
+          </div>
+          <div className="p-6 bg-[#0072AA] rounded-lg border-2 border-[#005A87] shadow-xl text-center">
+            <p className="text-sm font-semibold mb-2 text-slate-300">5 Years Net Savings</p>
+            <p className="text-3xl font-bold mb-2" style={{ color: '#21AA47' }}>{formatCurrency(metrics.net_savings_5_years)}</p>
+          </div>
+        </div>
+
+        {/* Buttons */}
+        <div className="flex justify-center gap-4">
+          <button
+            onClick={() => setShowModal(true)}
+            className="px-6 py-3 bg-[#0072AA] text-white rounded-lg font-semibold hover:bg-[#005A87] transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
+          >
+            <FileText className="w-5 h-5" />
+            View Detailed Breakdown
+          </button>
+          <button
+            onClick={() => setShowAssumptionsModal(true)}
+            className="px-6 py-3 bg-[#0072AA] text-white rounded-lg font-semibold hover:bg-[#005A87] transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
+          >
+            <FileText className="w-5 h-5" />
+            View/Modify Cost Assumptions
+          </button>
+        </div>
       </div>
 
-      {/* Detailed Breakdown */}
-      {/* Summary Cards - Combined Total with Descriptions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <div className="p-6 bg-slate-800 rounded-lg border-2 border-slate-700 shadow-xl">
-          <p className="text-sm font-semibold mb-2 text-slate-300">Paper-Based</p>
-          <p className="text-3xl font-bold text-white mb-2">{formatCurrency(costs.total_paper_cost)}</p>
-          <p className="text-xs text-slate-400">Total annual cost</p>
-        </div>
-        <div className="p-6 bg-slate-800 rounded-lg border-2 border-slate-700 shadow-xl">
-          <p className="text-sm font-semibold mb-2 text-slate-300">E-Signature</p>
-          <p className="text-3xl font-bold text-white mb-2">{formatCurrency(costs.total_esig_cost)}</p>
-          <p className="text-xs text-slate-400">Total annual cost</p>
-        </div>
-        <div className="p-6 bg-slate-800 rounded-lg border-2 border-slate-700 shadow-xl">
-          <p className="text-sm font-semibold mb-2 text-slate-300">Annual Savings</p>
-          <p className="text-3xl font-bold text-emerald-400 mb-2">{formatCurrency(costs.annual_savings)}</p>
-          <p className="text-xs text-slate-400">You save this much!</p>
-        </div>
-      </div>
+      {/* Modal Overlay */}
+      {showModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+          onClick={() => setShowModal(false)}
+        >
+          <div
+            className="bg-white rounded-xl shadow-2xl border-2 border-slate-300 max-w-5xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white border-b border-slate-200 p-6 flex items-center justify-between rounded-t-xl">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-slate-100 rounded-lg border border-slate-200">
+                  <span className="text-2xl font-bold text-slate-700">₹</span>
+                </div>
+                <h2 className="text-2xl font-bold text-slate-900">Detailed Cost Breakdown</h2>
+              </div>
+              <button
+                onClick={() => setShowModal(false)}
+                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                aria-label="Close"
+              >
+                <X className="w-6 h-6 text-slate-600" />
+              </button>
+            </div>
 
-      <div className="space-y-3">
-        <div className="grid grid-cols-4 gap-4 p-4 bg-slate-100 rounded-lg font-semibold text-sm text-slate-800 border border-slate-200">
-          <div>Cost Component</div>
-          <div className="text-right">Paper-Based (₹)</div>
-          <div className="text-right">E-Signature (₹)</div>
-          <div className="text-right">Annual Savings (₹)</div>
+            {/* Modal Content */}
+            <div className="p-6">
+              <div className="space-y-3">
+                <div className="grid grid-cols-4 gap-4 p-4 bg-slate-100 rounded-lg font-semibold text-sm text-slate-800 border border-slate-200">
+                  <div>Cost Component</div>
+                  <div className="text-right">Paper-Based (₹)</div>
+                  <div className="text-right">E-Signature (₹)</div>
+                  <div className="text-right">Annual Savings (₹)</div>
+                </div>
+                <CostItem
+                  label="Paper & Printing"
+                  paper={costs.paper_printing}
+                  esig={0}
+                  savings={costs.paper_printing}
+                />
+                <CostItem
+                  label="Physical Storage & Filing"
+                  paper={costs.storage_filing}
+                  esig={0}
+                  savings={costs.storage_filing}
+                />
+                <CostItem
+                  label="Staff Time (Processing & Signing)"
+                  paper={costs.paper_staff_time}
+                  esig={costs.esig_staff_time}
+                  savings={costs.paper_staff_time - costs.esig_staff_time}
+                />
+                <CostItem
+                  label="Document Loss/Recreation"
+                  paper={costs.doc_loss_recreation}
+                  esig={0}
+                  savings={costs.doc_loss_recreation}
+                />
+                <CostItem
+                  label="Compliance & Audit"
+                  paper={costs.paper_compliance_audit}
+                  esig={costs.esig_compliance_audit}
+                  savings={costs.paper_compliance_audit - costs.esig_compliance_audit}
+                />
+                <CostItem
+                  label="Software Subscription"
+                  paper={0}
+                  esig={costs.software_subscription}
+                  savings={-costs.software_subscription}
+                />
+                <CostItem
+                  label="Patient Signature Denial (Opportunity Cost)"
+                  paper={costs.patient_denial_cost_paper}
+                  esig={costs.patient_denial_cost_esig}
+                  savings={costs.patient_denial_savings}
+                />
+                <CostItem
+                  label="Compliance, Audit & DPDP Penalties"
+                  paper={costs.compliance_dpdp_penalty_paper}
+                  esig={costs.compliance_dpdp_penalty_esig}
+                  savings={costs.compliance_dpdp_penalty_savings}
+                />
+              </div>
+            </div>
+          </div>
         </div>
-        <CostItem
-          label="Paper & Printing"
-          paper={costs.paper_printing}
-          esig={0}
-          savings={costs.paper_printing}
-        />
-        <CostItem
-          label="Physical Storage & Filing"
-          paper={costs.storage_filing}
-          esig={0}
-          savings={costs.storage_filing}
-        />
-        <CostItem
-          label="Staff Time (Processing & Signing)"
-          paper={costs.paper_staff_time}
-          esig={costs.esig_staff_time}
-          savings={costs.paper_staff_time - costs.esig_staff_time}
-        />
-        <CostItem
-          label="Document Loss/Recreation"
-          paper={costs.doc_loss_recreation}
-          esig={0}
-          savings={costs.doc_loss_recreation}
-        />
-        <CostItem
-          label="Compliance & Audit"
-          paper={costs.paper_compliance_audit}
-          esig={costs.esig_compliance_audit}
-          savings={costs.paper_compliance_audit - costs.esig_compliance_audit}
-        />
-        <CostItem
-          label="Software Subscription"
-          paper={0}
-          esig={costs.software_subscription}
-          savings={-costs.software_subscription}
-        />
-        <CostItem
-          label="Patient Signature Denial (Opportunity Cost)"
-          paper={costs.patient_denial_cost_paper}
-          esig={costs.patient_denial_cost_esig}
-          savings={costs.patient_denial_savings}
-        />
-        <CostItem
-          label="Compliance, Audit & DPDP Penalties"
-          paper={costs.compliance_dpdp_penalty_paper}
-          esig={costs.compliance_dpdp_penalty_esig}
-          savings={costs.compliance_dpdp_penalty_savings}
-        />
-      </div>
-    </div>
+      )}
+
+      {/* Cost Assumptions Modal */}
+      {showAssumptionsModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+          onClick={() => {
+            setEditableAssumptions(costAssumptions); // Reset on cancel
+            setShowAssumptionsModal(false);
+          }}
+        >
+          <div
+            className="bg-white rounded-xl shadow-2xl border-2 border-slate-300 max-w-5xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white border-b border-slate-200 p-6 flex items-center justify-between rounded-t-xl">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-slate-100 rounded-lg border border-slate-200">
+                  <FileText className="w-6 h-6 text-slate-700" />
+                </div>
+                <h2 className="text-2xl font-bold text-slate-900">Cost Assumptions</h2>
+              </div>
+              <button
+                onClick={() => {
+                  setEditableAssumptions(costAssumptions); // Reset on cancel
+                  setShowAssumptionsModal(false);
+                }}
+                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                aria-label="Close"
+              >
+                <X className="w-6 h-6 text-slate-600" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <p className="text-sm text-slate-600">
+                  Industry benchmarks tailored for Indian healthcare. Values are protected to maintain consistency.
+                </p>
+                {!isEditingAssumptions && (
+                  <button
+                    onClick={() => setIsEditingAssumptions(true)}
+                    className="px-6 py-2 bg-[#0072AA] text-white rounded-lg font-semibold hover:bg-[#005A87] transition-all duration-200 shadow-md hover:shadow-lg"
+                  >
+                    Modify
+                  </button>
+                )}
+              </div>
+              <div className="border border-slate-200 rounded-lg overflow-hidden mb-6">
+                <div className="grid grid-cols-4 gap-4 bg-slate-100 px-4 py-3 text-xs font-semibold text-slate-700">
+                  <div>Cost Component</div>
+                  <div className="text-right">Value</div>
+                  <div className="text-center">Unit</div>
+                  <div>Notes</div>
+                </div>
+                <div className="divide-y divide-slate-200">
+                  {[
+                    {
+                      key: 'paper_cost_per_page' as keyof CostAssumptions,
+                      label: 'Paper Cost per Page',
+                      unit: '₹',
+                      notes: 'A4 paper cost including printing',
+                      step: 0.01,
+                      formatValue: (v: number | null) => v === null ? '—' : v.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                    },
+                    {
+                      key: 'storage_cost_per_doc' as keyof CostAssumptions,
+                      label: 'Storage Cost per Document per Year',
+                      unit: '₹',
+                      notes: 'Physical archival and retrieval costs',
+                      step: 0.1,
+                      formatValue: (v: number | null) => v === null ? '—' : v.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                    },
+                    {
+                      key: 'paper_time_per_doc' as keyof CostAssumptions,
+                      label: 'Staff Time per Document (Paper)',
+                      unit: 'minutes',
+                      notes: 'Time for printing, handling, manual filing',
+                      step: 0.5,
+                      formatValue: (v: number | null) => v === null ? '—' : v.toFixed(2),
+                    },
+                    {
+                      key: 'staff_hourly_cost' as keyof CostAssumptions,
+                      label: 'Average Staff Hourly Cost',
+                      unit: '₹',
+                      notes: 'Blended rate for document handlers',
+                      step: 10,
+                      formatValue: (v: number | null) => v === null ? '—' : v.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                    },
+                    {
+                      key: 'document_loss_rate' as keyof CostAssumptions,
+                      label: 'Document Loss/Re-creation Rate',
+                      unit: '%',
+                      notes: 'Documents lost or requiring recreation',
+                      step: 0.1,
+                      formatValue: (v: number | null) => v === null ? '—' : v.toFixed(2),
+                    },
+                    {
+                      key: 'paper_compliance_cost' as keyof CostAssumptions,
+                      label: 'Compliance Audit Cost per Year (Paper)',
+                      unit: '₹',
+                      notes: 'Manual audit and compliance costs',
+                      step: 1000,
+                      formatValue: (v: number | null) => v === null ? '—' : v.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                    },
+                    {
+                      key: 'esig_time_per_doc' as keyof CostAssumptions,
+                      label: 'E-Signature Staff Time per Document',
+                      unit: 'minutes',
+                      notes: 'Time for digital signing process',
+                      step: 0.5,
+                      formatValue: (v: number | null) => v === null ? '—' : v.toFixed(2),
+                    },
+                    {
+                      key: 'esig_compliance_cost' as keyof CostAssumptions,
+                      label: 'E-Signature Compliance Cost per Year',
+                      unit: '₹',
+                      notes: 'Digital audit and compliance costs',
+                      step: 1000,
+                      formatValue: (v: number | null) => v === null ? '—' : v.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                    },
+                    {
+                      key: 'paper_dpdp_penalty' as keyof CostAssumptions,
+                      label: 'Potential DPDP Non Compliance Penalty (Non-Compliant/Year)',
+                      unit: '₹',
+                      notes: 'Potential DPDP Act non-compliance costs',
+                      step: 1000,
+                      formatValue: (v: number | null) => v === null ? '—' : v.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                    },
+                    {
+                      key: 'esig_dpdp_penalty' as keyof CostAssumptions,
+                      label: 'DPDP Compliance Costs (Compliant/Year)',
+                      unit: '₹',
+                      notes: 'Minimal compliance cost with e-signature audit trail',
+                      step: 1000,
+                      formatValue: (v: number | null) => v === null ? '—' : v.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                    },
+                  ].map((item) => {
+                    const value = isEditingAssumptions ? editableAssumptions[item.key] : costAssumptions[item.key];
+                    return (
+                      <div key={item.key} className="grid grid-cols-4 gap-4 px-4 py-3 hover:bg-slate-50 transition-colors items-center">
+                        <div className="font-medium text-slate-900">{item.label}</div>
+                        <div className="text-right">
+                          {isEditingAssumptions ? (
+                            <input
+                              type="number"
+                              value={value === null ? '' : value}
+                              onChange={(e) => {
+                                const newValue = e.target.value === '' ? null : parseFloat(e.target.value);
+                                setEditableAssumptions({
+                                  ...editableAssumptions,
+                                  [item.key]: newValue,
+                                });
+                              }}
+                              step={item.step}
+                              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-400 focus:border-slate-500 bg-white text-slate-900 text-right"
+                              placeholder="—"
+                            />
+                          ) : (
+                            <span className="text-slate-700 font-medium">{item.formatValue(value)}</span>
+                          )}
+                        </div>
+                        <div className="text-center text-slate-600">{item.unit}</div>
+                        <div className="text-sm text-slate-600">{item.notes}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              {isEditingAssumptions && (
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => {
+                      setEditableAssumptions(costAssumptions); // Reset
+                      setIsEditingAssumptions(false);
+                    }}
+                    className="px-6 py-3 bg-slate-200 text-slate-700 rounded-lg font-semibold hover:bg-slate-300 transition-all duration-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      setCostAssumptions(editableAssumptions);
+                      setIsEditingAssumptions(false);
+                    }}
+                    className="px-6 py-3 bg-[#0072AA] text-white rounded-lg font-semibold hover:bg-[#005A87] transition-all duration-200 shadow-md hover:shadow-lg"
+                  >
+                    Apply
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -766,56 +1124,17 @@ function ROIMetricsSection({ metrics }: { metrics: ROIMetrics }) {
         <h2 className="text-2xl font-bold text-slate-900">ROI Summary & Payback Analysis</h2>
       </div>
       
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <MetricCard
-          title="Annual Savings (Year 2+)"
-          value={formatCurrency(metrics.annual_savings_year2_plus)}
-          subtitle="After Year 1 implementation"
-          color="slate"
-        />
-        <MetricCard
-          title="One-Time Implementation Cost"
-          value={formatCurrency(metrics.implementation_cost)}
-          subtitle="Year 1 only"
-          color="slate"
-        />
-        <MetricCard
-          title="Payback Period"
-          value={
-            metrics.payback_period_months < 1
-              ? `${metrics.payback_period_months.toFixed(2)} months`
-              : metrics.payback_period_months < 12
-              ? `${metrics.payback_period_months.toFixed(1)} months`
-              : `${(metrics.payback_period_months / 12).toFixed(1)} years`
-          }
-          subtitle="Months to recover cost"
-          color="slate"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <MetricCard
           title="Net Benefit - Year 1"
           value={formatCurrency(metrics.net_benefit_year1)}
           subtitle="Savings minus implementation"
           color="slate"
         />
-      </div>
-      
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <MetricCard
           title="Year 1 ROI (%)"
           value={`${metrics.year1_roi_percent.toFixed(1)}%`}
           subtitle="First year return"
-          color="slate"
-        />
-        <MetricCard
-          title="Year 2 ROI (%)"
-          value={`${metrics.year2_roi_percent.toFixed(1)}%`}
-          subtitle="Cumulative 2 years"
-          color="slate"
-        />
-        <MetricCard
-          title="Year 3 ROI (%)"
-          value={`${metrics.year3_roi_percent.toFixed(1)}%`}
-          subtitle="Cumulative 3 years"
           color="slate"
         />
         <MetricCard
@@ -901,23 +1220,19 @@ function BenefitsSection({ benefits }: { benefits: Benefits }) {
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-8">
-      <h2 className="text-2xl font-bold text-slate-900 mb-8 flex items-center gap-3">
+      <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
         <div className="p-2 bg-slate-100 rounded-lg border border-slate-200">
           <Zap className="w-6 h-6 text-slate-700" />
         </div>
         Annual Benefits (Non-Financial)
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-3">
         {benefitItems.map((item, idx) => (
-          <div key={idx} className="p-6 bg-slate-50 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-white rounded-lg border border-slate-200 shadow-sm">
-                <item.icon className="w-6 h-6 text-slate-700" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-lg text-slate-900 mb-2">{item.title}</h3>
-                <p className="text-sm text-slate-600 leading-relaxed">{item.desc}</p>
-              </div>
+          <div key={idx} className="flex items-start gap-3 text-slate-900">
+            <Check className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <span className="font-semibold">{item.title}:</span>{' '}
+              <span className="text-slate-700">{item.desc}</span>
             </div>
           </div>
         ))}
@@ -938,10 +1253,10 @@ function MetricCard({
   color?: 'slate';
 }) {
   return (
-    <div className="p-5 bg-slate-50 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
-      <p className="text-sm font-semibold mb-2 text-slate-600">{title}</p>
-      <p className="text-2xl font-bold text-slate-900">{value}</p>
-      <p className="text-xs mt-2 text-slate-500">{subtitle}</p>
+    <div className="p-6 bg-[#0072AA] rounded-lg border-2 border-[#005A87] shadow-xl text-center">
+      <p className="text-sm font-semibold mb-2 text-slate-300">{title}</p>
+      <p className="text-3xl font-bold mb-2" style={{ color: '#21AA47' }}>{value}</p>
+      <p className="text-xs text-slate-400">{subtitle}</p>
     </div>
   );
 }

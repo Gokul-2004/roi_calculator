@@ -58,3 +58,12 @@ input[type="range"].slider::-moz-range-thumb:hover {
   background: #334155;
   transform: scale(1.1);
 }
+
+@keyframes gradient-shift {
+  0%, 100% {
+    filter: brightness(1) drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+  }
+  50% {
+    filter: brightness(1.1) drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+  }
+}
