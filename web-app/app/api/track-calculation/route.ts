@@ -21,8 +21,8 @@ function getClientIP(request: NextRequest): string {
     return cfConnectingIP;
   }
   
-  // Fallback to connection remote address (if available)
-  return request.ip || 'unknown';
+  // Fallback - IP not available in NextRequest
+  return 'unknown';
 }
 
 export async function POST(request: NextRequest) {
