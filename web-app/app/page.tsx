@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Calculator, Save, TrendingUp, DollarSign, Clock, FileText, Zap, CheckCircle2, Check, Users, AlertCircle, Activity, Building2, Shield, FileCheck, Database, X, RefreshCw } from 'lucide-react';
+import { Calculator, Save, TrendingUp, DollarSign, Clock, FileText, Zap, CheckCircle2, Check, Users, AlertCircle, Activity, Building2, Shield, FileCheck, Database, X, RefreshCw, Cookie } from 'lucide-react';
 import {
   calculateAnnualCosts,
   calculateROIMetrics,
@@ -77,6 +77,25 @@ export default function Home() {
     roiMetrics: ROIMetrics;
     benefits: Benefits;
   } | null>(null);
+  const [showCookieBanner, setShowCookieBanner] = useState(false);
+
+  // Check if user has already accepted/declined cookies
+  useEffect(() => {
+    const cookieConsent = localStorage.getItem('cookieConsent');
+    if (!cookieConsent) {
+      setShowCookieBanner(true);
+    }
+  }, []);
+
+  const handleAcceptCookies = () => {
+    localStorage.setItem('cookieConsent', 'accepted');
+    setShowCookieBanner(false);
+  };
+
+  const handleDeclineCookies = () => {
+    localStorage.setItem('cookieConsent', 'declined');
+    setShowCookieBanner(false);
+  };
   const handleCalculate = async () => {
     const annualCosts = calculateAnnualCosts(inputs, costAssumptions);
     const roiMetrics = calculateROIMetrics(inputs, annualCosts);
@@ -334,6 +353,41 @@ export default function Home() {
           </button>
         </div>
       </div>
+
+      {/* Cookie Consent Banner */}
+      {showCookieBanner && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-slate-300 shadow-2xl z-50 p-4 md:p-6">
+          <div className="max-w-[1800px] mx-auto flex flex-col md:flex-row items-start md:items-center gap-4">
+            <div className="flex items-start gap-3 flex-1">
+              <div className="p-2 bg-slate-100 rounded-lg border border-slate-200 flex-shrink-0">
+                <Cookie className="w-5 h-5 text-slate-700" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-slate-900 mb-1">Cookie Consent</h3>
+                <p className="text-sm text-slate-700">
+                  We use cookies to track calculation data and IP addresses for analytics purposes. 
+                  By clicking "Accept", you consent to our data collection practices. 
+                  <a href="#" className="text-[#0072AA] hover:underline ml-1">Learn more</a>
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3 flex-shrink-0">
+              <button
+                onClick={handleDeclineCookies}
+                className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg font-semibold hover:bg-slate-300 transition-all duration-200"
+              >
+                Decline
+              </button>
+              <button
+                onClick={handleAcceptCookies}
+                className="px-6 py-2 bg-[#0072AA] text-white rounded-lg font-semibold hover:bg-[#005A87] transition-all duration-200 shadow-md hover:shadow-lg"
+              >
+                Accept
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
