@@ -141,13 +141,26 @@ export function calculateROIMetrics(
   inputParams: InputParams,
   annualCosts: AnnualCosts
 ): ROIMetrics {
-  const { implementation_cost, implementation_timeline_months } = inputParams;
+  const { implementation_cost, implementation_timeline_months, esig_annual_cost } = inputParams;
   const { annual_savings } = annualCosts;
 
   const paybackPeriod = annual_savings > 0 ? (implementation_cost / annual_savings) * 12 : Infinity;
   const netBenefitYear1 = annual_savings - implementation_cost;
-  const year1ROI = implementation_cost > 0 ? (netBenefitYear1 / implementation_cost) * 100 : Infinity;
-  const year2ROI = implementation_cost > 0 ? (annual_savings / implementation_cost) * 100 : Infinity;
+  
+  // All ROI calculations use: Cumulative Savings / (Implementation Cost + E-Signature Annual Cost) * 100
+  const totalYear1Investment = implementation_cost + esig_annual_cost;
+  
+  // Year 1 ROI = Annual Savings / (Implementation Cost + E-Signature Annual Cost) * 100
+  const year1ROI = totalYear1Investment > 0 ? (annual_savings / totalYear1Investment) * 100 : Infinity;
+  
+  // Year 2 ROI = (2 * Annual Savings) / (Implementation Cost + E-Signature Annual Cost) * 100
+  const year2ROI = totalYear1Investment > 0 ? ((annual_savings * 2) / totalYear1Investment) * 100 : Infinity;
+  
+  // Year 3 ROI = (3 * Annual Savings) / (Implementation Cost + E-Signature Annual Cost) * 100
+  const year3ROI = totalYear1Investment > 0 ? ((annual_savings * 3) / totalYear1Investment) * 100 : Infinity;
+  
+  // Year 5 ROI = (5 * Annual Savings) / (Implementation Cost + E-Signature Annual Cost) * 100
+  const year5ROI = totalYear1Investment > 0 ? ((annual_savings * 5) / totalYear1Investment) * 100 : Infinity;
 
   return {
     annual_savings_year2_plus: annual_savings,
@@ -156,8 +169,8 @@ export function calculateROIMetrics(
     net_benefit_year1: netBenefitYear1,
     year1_roi_percent: year1ROI,
     year2_roi_percent: year2ROI,
-    year3_roi_percent: year2ROI,
-    year5_roi_percent: year2ROI,
+    year3_roi_percent: year3ROI,
+    year5_roi_percent: year5ROI,
     net_savings_3_years: annual_savings * 3 - implementation_cost,
     net_savings_5_years: annual_savings * 5 - implementation_cost,
   };

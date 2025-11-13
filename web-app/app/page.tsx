@@ -15,7 +15,6 @@ import {
   type Benefits,
   type CostAssumptions,
 } from '@/lib/calculations';
-import { saveCalculation, loadCalculations, deleteCalculation, type SavedCalculation } from '@/lib/supabase-helpers';
 
 const DEFAULT_INPUTS: InputParams = {
   documents_per_year: 2000000,
@@ -78,27 +77,37 @@ export default function Home() {
     roiMetrics: ROIMetrics;
     benefits: Benefits;
   } | null>(null);
-  const [savedCalculations, setSavedCalculations] = useState<SavedCalculation[]>([]);
-  const [saveName, setSaveName] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
-  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
-
-  useEffect(() => {
-    loadSavedCalculations();
-  }, []);
-
-  const loadSavedCalculations = async () => {
-    const calcs = await loadCalculations();
-    setSavedCalculations(calcs);
-  };
-
-  const handleCalculate = () => {
+  const handleCalculate = async () => {
     const annualCosts = calculateAnnualCosts(inputs, costAssumptions);
     const roiMetrics = calculateROIMetrics(inputs, annualCosts);
     const benefits = calculateBenefits(inputs);
-    setResults({ annualCosts, roiMetrics, benefits });
+    const newResults = { annualCosts, roiMetrics, benefits };
+    setResults(newResults);
+    
+    // Automatically track calculation with IP address
+    try {
+      const response = await fetch('/api/track-calculation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          inputParams: inputs,
+          results: newResults,
+        }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ Calculation tracked successfully:', data.id);
+      } else {
+        const error = await response.json();
+        console.error('❌ Failed to track calculation:', error);
+      }
+    } catch (error) {
+      // Silently fail - tracking shouldn't break the user experience
+      console.error('❌ Failed to track calculation:', error);
+    }
   };
 
   // Auto-calculate when inputs or assumptions change (after first calculation)
@@ -112,43 +121,6 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputs, costAssumptions]);
 
-  const handleSave = async () => {
-    if (!saveName.trim() || !results) return;
-    setIsSaving(true);
-    const saved = await saveCalculation(saveName, inputs, results);
-    if (saved) {
-      setSaveName('');
-      await loadSavedCalculations();
-      setShowSaveSuccess(true);
-      // Auto-hide after 5 seconds
-      setTimeout(() => setShowSaveSuccess(false), 5000);
-    }
-    setIsSaving(false);
-  };
-
-  const handleLoad = (calc: SavedCalculation) => {
-    setInputs(calc.input_parameters);
-    setResults(calc.calculated_results);
-  };
-
-  const handleDeleteClick = (id: string) => {
-    setDeleteConfirmId(id);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (deleteConfirmId) {
-      await deleteCalculation(deleteConfirmId);
-      await loadSavedCalculations();
-      setDeleteConfirmId(null);
-      setShowDeleteSuccess(true);
-      // Auto-hide after 5 seconds
-      setTimeout(() => setShowDeleteSuccess(false), 5000);
-    }
-  };
-
-  const handleDeleteCancel = () => {
-    setDeleteConfirmId(null);
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-gray-50 to-slate-100">
@@ -170,92 +142,6 @@ export default function Home() {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              {/* Saved Calculations Dropdown */}
-              <div className="relative group">
-                <button className="hidden md:flex items-center gap-2 px-4 py-2 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 transition">
-                  <FileText className="w-4 h-4 text-slate-700" />
-                  <span className="text-sm font-semibold text-slate-700">Saved ({savedCalculations.length})</span>
-                </button>
-                <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-200 p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                  <h3 className="font-bold text-sm text-slate-900 mb-3">Saved Calculations</h3>
-                  
-                  {/* Delete Success Message */}
-                  {showDeleteSuccess && (
-                    <div className="mb-3 p-3 bg-emerald-50 border-2 border-emerald-200 rounded-lg flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                      <p className="text-xs font-semibold text-emerald-900 flex-1">Calculation deleted successfully!</p>
-                      <button
-                        onClick={() => setShowDeleteSuccess(false)}
-                        className="text-emerald-600 hover:text-emerald-800 transition-colors"
-                        aria-label="Close"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Delete Confirmation Card */}
-                  {deleteConfirmId && (
-                    <div className="mb-3 p-3 bg-red-50 border-2 border-red-200 rounded-lg">
-                      <p className="text-xs font-semibold text-red-900 mb-2">Delete this calculation?</p>
-                      <p className="text-xs text-red-700 mb-3">This action cannot be undone.</p>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={handleDeleteConfirm}
-                          className="flex-1 text-xs px-3 py-1.5 bg-red-600 text-white rounded hover:bg-red-700 font-medium transition"
-                        >
-                          Confirm Delete
-                        </button>
-                        <button
-                          onClick={handleDeleteCancel}
-                          className="flex-1 text-xs px-3 py-1.5 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 font-medium transition"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                    {savedCalculations.length === 0 ? (
-                      <p className="text-xs text-slate-500">No saved calculations yet</p>
-                    ) : (
-                      savedCalculations.map((calc) => (
-                        <div
-                          key={calc.id}
-                          className={`p-3 bg-slate-50 rounded-lg border border-slate-200 hover:border-slate-300 hover:shadow-sm transition-all duration-200 ${deleteConfirmId === calc.id ? 'ring-2 ring-red-300' : ''}`}
-                        >
-                          <p className="font-semibold text-xs text-slate-900 mb-1 truncate">{calc.session_name}</p>
-                          <p className="text-xs text-slate-500 mb-2">
-                            {new Date(calc.created_at).toLocaleDateString('en-US', { 
-                              month: 'short', 
-                              day: 'numeric',
-                              year: 'numeric'
-                            })}
-                          </p>
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleLoad(calc)}
-                              className="flex-1 text-xs px-2 py-1.5 bg-[#0072AA] text-white rounded hover:bg-[#005A87] font-medium transition"
-                            >
-                              Load
-                            </button>
-                            <button
-                              onClick={() => handleDeleteClick(calc.id)}
-                              disabled={deleteConfirmId !== null}
-                              className="flex-1 text-xs px-2 py-1.5 bg-slate-600 text-white rounded hover:bg-slate-700 font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              </div>
               <button
                 onClick={handleCalculate}
                 className="hidden md:flex items-center gap-2 px-4 py-2 bg-[#0072AA] text-white border border-[#005A87] rounded-full hover:bg-[#005A87] transition-all duration-200 shadow-md hover:shadow-lg"
@@ -268,8 +154,26 @@ export default function Home() {
         </div>
       </header>
 
+      {/* DPDP Act Disclaimer Banner */}
+      <div className="fixed top-24 left-0 right-0 h-10 bg-gradient-to-r from-red-600 via-red-500 to-red-600 text-white overflow-hidden z-50 flex items-center">
+        <div className="flex animate-scroll whitespace-nowrap">
+          <div className="flex items-center gap-4 px-4 min-w-max">
+            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            <span className="font-semibold text-sm md:text-base">
+              ⚠️ Disclaimer: Not complying with DPDP Act could potentially lead to a fine up to ₹250 Crores
+            </span>
+          </div>
+          <div className="flex items-center gap-4 px-4 min-w-max">
+            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            <span className="font-semibold text-sm md:text-base">
+              ⚠️ Disclaimer: Not complying with DPDP Act could potentially lead to a fine up to ₹250 Crores
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* Left Sidebar - Input Parameters (Fixed - Doesn't scroll) */}
-      <aside className="hidden lg:block fixed left-0 top-24 bottom-0 w-[357px] bg-white border-r border-slate-200 shadow-lg z-40 overflow-y-auto">
+      <aside className="hidden lg:block fixed left-0 top-[136px] bottom-0 w-[286px] bg-white border-r border-slate-200 shadow-lg z-30 overflow-y-auto">
         <div className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2 bg-slate-100 rounded-lg border border-slate-200">
@@ -320,15 +224,6 @@ export default function Home() {
               type="number"
               step="100000"
             />
-            <SliderField
-              label="Implementation Timeline (Months)"
-              value={inputs.implementation_timeline_months}
-              onChange={(v) => setInputs({ ...inputs, implementation_timeline_months: v })}
-              min={1}
-              max={30}
-              step={0.5}
-              formatValue={(v) => `${v.toFixed(1)} months`}
-            />
           </div>
           <button
             onClick={handleCalculate}
@@ -341,8 +236,8 @@ export default function Home() {
       </aside>
 
       {/* Right Side - Results (Scrollable) */}
-      <div className="lg:pl-[357px]">
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="lg:pl-[286px]">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 pt-[144px] pb-8">
           <main className="space-y-6">
             {/* Results */}
             {results ? (
@@ -364,53 +259,6 @@ export default function Home() {
                 
                 {/* Benefits */}
                 <BenefitsSection benefits={results.benefits} />
-                
-                {/* Save Section */}
-                <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-8">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 bg-slate-100 rounded-lg border border-slate-200">
-                      <Save className="w-6 h-6 text-slate-700" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-slate-900">Save Calculation</h2>
-                  </div>
-                  
-                  {/* Success Message Card */}
-                  {showSaveSuccess && (
-                    <div className="mb-6 p-4 bg-emerald-50 border-2 border-emerald-200 rounded-lg flex items-center gap-3 transition-all duration-300">
-                      <CheckCircle2 className="w-6 h-6 text-emerald-600 flex-shrink-0" />
-                      <div className="flex-1">
-                        <p className="font-semibold text-emerald-900">Calculation saved successfully!</p>
-                        <p className="text-sm text-emerald-700">Your calculation has been saved and is available in the "Saved" dropdown.</p>
-                      </div>
-                      <button
-                        onClick={() => setShowSaveSuccess(false)}
-                        className="text-emerald-600 hover:text-emerald-800 transition-colors"
-                        aria-label="Close"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                  )}
-                  
-                  <div className="flex gap-3">
-                    <input
-                      type="text"
-                      value={saveName}
-                      onChange={(e) => setSaveName(e.target.value)}
-                      placeholder="Enter a name for this calculation"
-                      className="flex-1 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-400 focus:border-slate-500 bg-white text-slate-900 font-medium placeholder:text-slate-400"
-                    />
-                    <button
-                      onClick={handleSave}
-                      disabled={!saveName.trim() || isSaving}
-                      className="px-8 py-3 bg-[#0072AA] text-white rounded-lg font-bold hover:bg-[#005A87] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
-                    >
-                      {isSaving ? 'Saving...' : '💾 Save'}
-                    </button>
-                  </div>
-                </div>
               </>
             ) : (
               <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-12 text-center">
@@ -474,15 +322,6 @@ export default function Home() {
               onChange={(v) => setInputs({ ...inputs, implementation_cost: v })}
               type="number"
               step="100000"
-            />
-            <SliderField
-              label="Implementation Timeline (Months)"
-              value={inputs.implementation_timeline_months}
-              onChange={(v) => setInputs({ ...inputs, implementation_timeline_months: v })}
-              min={1}
-              max={30}
-              step={0.5}
-              formatValue={(v) => `${v.toFixed(1)} months`}
             />
           </div>
           <button
@@ -604,8 +443,9 @@ function CostBreakdownSection({
           <h2 className="text-2xl font-bold text-slate-900">Annual Cost Breakdown</h2>
         </div>
 
-        {/* Summary Cards - Combined Total with Descriptions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        {/* All 8 Cards in 4x2 Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {/* Row 1 */}
           <div className="p-6 bg-[#0072AA] rounded-lg border-2 border-[#005A87] shadow-xl text-center">
             <p className="text-sm font-semibold mb-2 text-slate-300">Paper-Based</p>
             <p className="text-3xl font-bold mb-2" style={{ color: '#21AA47' }}>{formatCurrency(costs.total_paper_cost)}</p>
@@ -621,20 +461,17 @@ function CostBreakdownSection({
             <p className="text-3xl font-bold mb-2" style={{ color: '#21AA47' }}>{formatCurrency(costs.annual_savings)}</p>
             <p className="text-xs text-slate-400">You save this much!</p>
           </div>
-        </div>
-
-        {/* ROI Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <MetricCard
             title="Net Benefit - Year 1"
             value={formatCurrency(metrics.net_benefit_year1)}
             subtitle="Savings minus implementation"
             color="slate"
           />
+          {/* Row 2 */}
           <MetricCard
             title="Year 1 ROI (%)"
             value={`${metrics.year1_roi_percent.toFixed(1)}%`}
-            subtitle="First year return"
+            subtitle="Year 1 ROI—first year return (after implementation)"
             color="slate"
           />
           <MetricCard
@@ -643,9 +480,6 @@ function CostBreakdownSection({
             subtitle="Cumulative 5 years"
             color="slate"
           />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div className="p-6 bg-[#0072AA] rounded-lg border-2 border-[#005A87] shadow-xl text-center">
             <p className="text-sm font-semibold mb-2 text-slate-300">3 Years Net Savings</p>
             <p className="text-3xl font-bold mb-2" style={{ color: '#21AA47' }}>{formatCurrency(metrics.net_savings_3_years)}</p>
@@ -746,18 +580,6 @@ function CostBreakdownSection({
                   paper={0}
                   esig={costs.software_subscription}
                   savings={-costs.software_subscription}
-                />
-                <CostItem
-                  label="Patient Signature Denial (Opportunity Cost)"
-                  paper={costs.patient_denial_cost_paper}
-                  esig={costs.patient_denial_cost_esig}
-                  savings={costs.patient_denial_savings}
-                />
-                <CostItem
-                  label="Compliance, Audit & DPDP Penalties"
-                  paper={costs.compliance_dpdp_penalty_paper}
-                  esig={costs.compliance_dpdp_penalty_esig}
-                  savings={costs.compliance_dpdp_penalty_savings}
                 />
               </div>
             </div>
@@ -883,22 +705,6 @@ function CostBreakdownSection({
                       label: 'E-Signature Compliance Cost per Year',
                       unit: '₹',
                       notes: 'Digital audit and compliance costs',
-                      step: 1000,
-                      formatValue: (v: number | null) => v === null ? '—' : v.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-                    },
-                    {
-                      key: 'paper_dpdp_penalty' as keyof CostAssumptions,
-                      label: 'Potential DPDP Non Compliance Penalty (Non-Compliant/Year)',
-                      unit: '₹',
-                      notes: 'Potential DPDP Act non-compliance costs',
-                      step: 1000,
-                      formatValue: (v: number | null) => v === null ? '—' : v.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-                    },
-                    {
-                      key: 'esig_dpdp_penalty' as keyof CostAssumptions,
-                      label: 'DPDP Compliance Costs (Compliant/Year)',
-                      unit: '₹',
-                      notes: 'Minimal compliance cost with e-signature audit trail',
                       step: 1000,
                       formatValue: (v: number | null) => v === null ? '—' : v.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
                     },
@@ -1030,18 +836,6 @@ function AssumptionsSection() {
       unit: '₹',
       notes: 'Digital audit and compliance costs',
     },
-    {
-      label: 'Potential DPDP Non Compliance Penalty (Non-Compliant/Year)',
-      value: formatValue(COST_ASSUMPTIONS.paper_dpdp_penalty, 'currency'),
-      unit: '₹',
-      notes: 'Potential DPDP Act non-compliance costs',
-    },
-    {
-      label: 'DPDP Compliance Costs (Compliant/Year)',
-      value: formatValue(COST_ASSUMPTIONS.esig_dpdp_penalty, 'currency'),
-      unit: '₹',
-      notes: 'Minimal compliance cost with e-signature audit trail',
-    },
   ];
 
   return (
@@ -1164,7 +958,7 @@ function BenefitsSection({ benefits }: { benefits: Benefits }) {
     { 
       icon: Zap, 
       title: 'Instant Document Signing', 
-      desc: 'Patients sign at admission/discharge kiosk. Zero waiting time for approvals.' 
+      desc: 'Zero waiting time for approvals at admission/discharge kiosks.' 
     },
     { 
       icon: FileText, 
@@ -1174,7 +968,7 @@ function BenefitsSection({ benefits }: { benefits: Benefits }) {
     { 
       icon: CheckCircle2, 
       title: 'Compliance & Audit Trail', 
-      desc: '100% digital audit trail with timestamps. NABH, ABDM compliance easier.' 
+      desc: '100% digital audit trail. NABH, ABDM compliance.' 
     },
     { 
       icon: Clock, 
@@ -1184,37 +978,37 @@ function BenefitsSection({ benefits }: { benefits: Benefits }) {
     { 
       icon: AlertCircle, 
       title: 'Error Reduction', 
-      desc: 'No lost signatures or missing approvals. Improved operational efficiency.' 
+      desc: 'No lost signatures or missing approvals.' 
     },
     { 
       icon: Users, 
       title: 'Patient Experience', 
-      desc: 'Faster onboarding and discharge process. Enhanced patient satisfaction.' 
+      desc: 'Faster onboarding and discharge. Enhanced patient satisfaction.' 
     },
     { 
       icon: Activity, 
       title: 'EMR Seamless Integration', 
-      desc: 'Real-time e-signature sync with EMR systems. Eliminates manual data entry & transcription errors.' 
+      desc: 'Real-time EMR sync. Eliminates manual data entry errors.' 
     },
     { 
       icon: Building2, 
       title: 'Reduced Hospital Congestion', 
-      desc: 'Faster document processing at admission/discharge. Improves patient flow & reduces waiting times.' 
+      desc: 'Faster document processing. Reduces waiting times.' 
     },
     { 
       icon: Shield, 
       title: 'Indian Evidence Act Compliance', 
-      desc: 'Digital signatures comply with Section 3A of Indian Evidence Act. Legally valid & admissible in courts.' 
+      desc: 'Compliant with Section 3A. Legally valid & admissible.' 
     },
     { 
       icon: FileCheck, 
       title: 'IT Act 2000 Compliance', 
-      desc: 'Compliant with Indian IT Act Section 5 (electronic records). Valid alternate to paper documents.' 
+      desc: 'IT Act Section 5 compliant. Valid alternate to paper documents.' 
     },
     { 
       icon: Database, 
       title: 'DPDP Compliance Ready', 
-      desc: 'Full audit trail + data residency options. Reduced regulatory violation risks.' 
+      desc: 'Full audit trail + data residency. Reduced regulatory risks.' 
     },
   ];
 
