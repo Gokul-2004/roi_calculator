@@ -65,7 +65,12 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('Error saving calculation tracking:', error);
       return NextResponse.json(
-        { error: 'Failed to save calculation', details: error.message },
+        { 
+          error: 'Failed to save calculation', 
+          details: error.message,
+          code: error.code,
+          hint: error.hint
+        },
         { status: 500 }
       );
     }

@@ -103,6 +103,7 @@ export default function Home() {
       } else {
         const error = await response.json();
         console.error('❌ Failed to track calculation:', error);
+        console.error('Error details:', JSON.stringify(error, null, 2));
       }
     } catch (error) {
       // Silently fail - tracking shouldn't break the user experience
