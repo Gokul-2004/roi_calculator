@@ -199,8 +199,8 @@ export default function Home() {
       <aside className="hidden lg:block fixed left-0 top-[136px] bottom-0 w-[286px] bg-white border-r border-slate-200 shadow-lg z-30 overflow-y-auto">
         <div className="p-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-slate-100 rounded-lg border border-slate-200">
-              <Calculator className="w-5 h-5 text-slate-700" />
+            <div className="p-2 bg-[#32BF84] rounded-lg border border-[#28A06A]">
+              <Calculator className="w-5 h-5 text-white" />
             </div>
             <h2 className="text-xl font-bold text-slate-900">Input Parameters</h2>
           </div>
@@ -285,7 +285,7 @@ export default function Home() {
               </>
             ) : (
               <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-12 text-center">
-                <Calculator className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                <Calculator className="w-16 h-16 text-[#32BF84] mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-slate-700 mb-2">Ready to Calculate</h3>
                 <p className="text-slate-500">Adjust the parameters on the left and click "Calculate ROI" to see results</p>
               </div>
@@ -298,8 +298,8 @@ export default function Home() {
       <div className="lg:hidden px-4 sm:px-6 py-6">
         <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-slate-100 rounded-lg border border-slate-200">
-              <Calculator className="w-5 h-5 text-slate-700" />
+            <div className="p-2 bg-[#32BF84] rounded-lg border border-[#28A06A]">
+              <Calculator className="w-5 h-5 text-white" />
             </div>
             <h2 className="text-xl font-bold text-slate-900">Input Parameters</h2>
           </div>
@@ -362,8 +362,8 @@ export default function Home() {
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-slate-300 shadow-2xl z-50 p-4 md:p-6">
           <div className="max-w-[1800px] mx-auto flex flex-col md:flex-row items-start md:items-center gap-4">
             <div className="flex items-start gap-3 flex-1">
-              <div className="p-2 bg-slate-100 rounded-lg border border-slate-200 flex-shrink-0">
-                <Cookie className="w-5 h-5 text-slate-700" />
+              <div className="p-2 bg-[#32BF84] rounded-lg border border-[#28A06A] flex-shrink-0">
+                <Cookie className="w-5 h-5 text-white" />
               </div>
               <div className="flex-1">
                 <h3 className="font-bold text-slate-900 mb-1">Cookie Consent</h3>
@@ -495,8 +495,8 @@ function CostBreakdownSection({
     <>
       <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-8">
         <div className="flex items-center gap-3 mb-8">
-          <div className="p-2 bg-slate-100 rounded-lg border border-slate-200">
-            <span className="text-2xl font-bold text-slate-700">₹</span>
+          <div className="p-2 bg-[#32BF84] rounded-lg border border-[#28A06A]">
+            <span className="text-2xl font-bold text-white">₹</span>
           </div>
           <h2 className="text-2xl font-bold text-slate-900">Annual Cost Breakdown</h2>
         </div>
@@ -661,8 +661,8 @@ function CostBreakdownSection({
             {/* Modal Header */}
             <div className="sticky top-0 bg-white border-b border-slate-200 p-6 flex items-center justify-between rounded-t-xl">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-slate-100 rounded-lg border border-slate-200">
-                  <FileText className="w-6 h-6 text-slate-700" />
+                <div className="p-2 bg-[#32BF84] rounded-lg border border-[#28A06A]">
+                  <FileText className="w-6 h-6 text-white" />
                 </div>
                 <h2 className="text-2xl font-bold text-slate-900">Cost Assumptions</h2>
               </div>
@@ -899,8 +899,8 @@ function AssumptionsSection() {
   return (
     <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-8">
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 bg-slate-100 rounded-lg border border-slate-200">
-          <FileText className="w-6 h-6 text-slate-700" />
+        <div className="p-2 bg-[#32BF84] rounded-lg border border-[#28A06A]">
+          <FileText className="w-6 h-6 text-white" />
         </div>
         <h2 className="text-2xl font-bold text-slate-900">Cost Assumptions</h2>
       </div>
@@ -970,8 +970,8 @@ function ROIMetricsSection({ metrics }: { metrics: ROIMetrics }) {
   return (
     <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-8">
       <div className="flex items-center gap-3 mb-8">
-        <div className="p-2 bg-slate-100 rounded-lg border border-slate-200">
-          <TrendingUp className="w-6 h-6 text-slate-700" />
+        <div className="p-2 bg-[#32BF84] rounded-lg border border-[#28A06A]">
+          <TrendingUp className="w-6 h-6 text-white" />
         </div>
         <h2 className="text-2xl font-bold text-slate-900">ROI Summary & Payback Analysis</h2>
       </div>
@@ -1073,8 +1073,8 @@ function BenefitsSection({ benefits }: { benefits: Benefits }) {
   return (
     <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-8">
       <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-        <div className="p-2 bg-slate-100 rounded-lg border border-slate-200">
-          <Zap className="w-6 h-6 text-slate-700" />
+        <div className="p-2 bg-[#32BF84] rounded-lg border border-[#28A06A]">
+          <Zap className="w-6 h-6 text-white" />
         </div>
         Annual Benefits (Non-Financial)
       </h2>
