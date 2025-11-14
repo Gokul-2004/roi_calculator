@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Calculator, Save, TrendingUp, DollarSign, Clock, FileText, Zap, CheckCircle2, Check, Users, AlertCircle, Activity, Building2, Shield, FileCheck, Database, X, RefreshCw, Cookie } from 'lucide-react';
 import {
   calculateAnnualCosts,
@@ -149,22 +150,24 @@ export default function Home() {
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-[#0072AA] rounded-lg shadow-md">
-                <Calculator className="w-7 h-7 text-white" />
-              </div>
+              <Image
+                src="/certinal_logo.webp"
+                alt="CERTINAL Logo"
+                width={200}
+                height={60}
+                className="h-12 w-auto"
+                priority
+              />
               <div>
                 <h1 className="text-3xl font-bold text-slate-900">
                   ROI Calculator
           </h1>
-                <p className="text-sm font-medium text-slate-600 mt-1">
-                  Paper-Based vs E-Signature Solution
-                </p>
               </div>
             </div>
             <div className="flex items-center gap-4">
               <button
                 onClick={handleCalculate}
-                className="hidden md:flex items-center gap-2 px-4 py-2 bg-[#0072AA] text-white border border-[#005A87] rounded-full hover:bg-[#005A87] transition-all duration-200 shadow-md hover:shadow-lg"
+                className="hidden md:flex items-center gap-2 px-4 py-2 bg-[#32BF84] text-white border border-[#28A06A] rounded-full hover:bg-[#28A06A] transition-all duration-200 shadow-md hover:shadow-lg"
               >
                 <RefreshCw className="w-4 h-4" />
                 <span className="text-sm font-semibold">Refresh</span>
@@ -175,7 +178,7 @@ export default function Home() {
       </header>
 
       {/* DPDP Act Disclaimer Banner */}
-      <div className="fixed top-24 left-0 right-0 h-10 bg-gradient-to-r from-red-600 via-red-500 to-red-600 text-white overflow-hidden z-50 flex items-center">
+      <div className="fixed top-24 left-0 right-0 h-10 bg-gradient-to-r from-[#28A06A] via-[#32BF84] to-[#28A06A] text-white overflow-hidden z-50 flex items-center">
         <div className="flex animate-scroll whitespace-nowrap">
           <div className="flex items-center gap-4 px-4 min-w-max">
             <AlertCircle className="w-5 h-5 flex-shrink-0" />
@@ -247,7 +250,7 @@ export default function Home() {
           </div>
           <button
             onClick={handleCalculate}
-            className="mt-6 w-full bg-[#0072AA] text-white py-3 px-6 rounded-lg font-bold hover:bg-[#005A87] transition-all duration-200 shadow-md hover:shadow-lg"
+            className="mt-6 w-full bg-[#32BF84] text-white py-3 px-6 rounded-lg font-bold hover:bg-[#28A06A] transition-all duration-200 shadow-md hover:shadow-lg"
           >
             <Calculator className="w-5 h-5 inline mr-2" />
             Calculate ROI
@@ -346,7 +349,7 @@ export default function Home() {
           </div>
           <button
             onClick={handleCalculate}
-            className="mt-6 w-full bg-[#0072AA] text-white py-3 px-6 rounded-lg font-bold hover:bg-[#005A87] transition-all duration-200 shadow-md hover:shadow-lg"
+            className="mt-6 w-full bg-[#32BF84] text-white py-3 px-6 rounded-lg font-bold hover:bg-[#28A06A] transition-all duration-200 shadow-md hover:shadow-lg"
           >
             <Calculator className="w-5 h-5 inline mr-2" />
             Calculate ROI
@@ -367,7 +370,7 @@ export default function Home() {
                 <p className="text-sm text-slate-700">
                   We use cookies to track calculation data and IP addresses for analytics purposes. 
                   By clicking "Accept", you consent to our data collection practices. 
-                  <a href="#" className="text-[#0072AA] hover:underline ml-1">Learn more</a>
+                  <a href="#" className="text-[#32BF84] hover:underline ml-1">Learn more</a>
                 </p>
               </div>
             </div>
@@ -380,7 +383,7 @@ export default function Home() {
               </button>
               <button
                 onClick={handleAcceptCookies}
-                className="px-6 py-2 bg-[#0072AA] text-white rounded-lg font-semibold hover:bg-[#005A87] transition-all duration-200 shadow-md hover:shadow-lg"
+                className="px-6 py-2 bg-[#32BF84] text-white rounded-lg font-semibold hover:bg-[#28A06A] transition-all duration-200 shadow-md hover:shadow-lg"
               >
                 Accept
               </button>
@@ -501,20 +504,20 @@ function CostBreakdownSection({
         {/* All 8 Cards in 4x2 Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {/* Row 1 */}
-          <div className="p-6 bg-[#0072AA] rounded-lg border-2 border-[#005A87] shadow-xl text-center">
-            <p className="text-sm font-semibold mb-2 text-slate-300">Paper-Based</p>
-            <p className="text-3xl font-bold mb-2" style={{ color: '#21AA47' }}>{formatCurrency(costs.total_paper_cost)}</p>
-            <p className="text-xs text-slate-400">Total annual cost</p>
+          <div className="p-6 bg-[#32BF84] rounded-lg border-2 border-[#28A06A] shadow-xl text-center">
+            <p className="text-sm font-semibold mb-2 text-white">Paper-Based</p>
+            <p className="text-3xl font-bold mb-2 text-white">{formatCurrency(costs.total_paper_cost)}</p>
+            <p className="text-xs text-white">Total annual cost</p>
           </div>
-          <div className="p-6 bg-[#0072AA] rounded-lg border-2 border-[#005A87] shadow-xl text-center">
-            <p className="text-sm font-semibold mb-2 text-slate-300">E-Signature</p>
-            <p className="text-3xl font-bold mb-2" style={{ color: '#21AA47' }}>{formatCurrency(costs.total_esig_cost)}</p>
-            <p className="text-xs text-slate-400">Total annual cost</p>
+          <div className="p-6 bg-[#32BF84] rounded-lg border-2 border-[#28A06A] shadow-xl text-center">
+            <p className="text-sm font-semibold mb-2 text-white">E-Signature</p>
+            <p className="text-3xl font-bold mb-2 text-white">{formatCurrency(costs.total_esig_cost)}</p>
+            <p className="text-xs text-white">Total annual cost</p>
           </div>
-          <div className="p-6 bg-[#0072AA] rounded-lg border-2 border-[#005A87] shadow-xl text-center">
-            <p className="text-sm font-semibold mb-2 text-slate-300">Annual Savings</p>
-            <p className="text-3xl font-bold mb-2" style={{ color: '#21AA47' }}>{formatCurrency(costs.annual_savings)}</p>
-            <p className="text-xs text-slate-400">You save this much!</p>
+          <div className="p-6 bg-[#32BF84] rounded-lg border-2 border-[#28A06A] shadow-xl text-center">
+            <p className="text-sm font-semibold mb-2 text-white">Annual Savings</p>
+            <p className="text-3xl font-bold mb-2 text-white">{formatCurrency(costs.annual_savings)}</p>
+            <p className="text-xs text-white">You save this much!</p>
           </div>
           <MetricCard
             title="Net Benefit - Year 1"
@@ -535,13 +538,13 @@ function CostBreakdownSection({
             subtitle="Cumulative 5 years"
             color="slate"
           />
-          <div className="p-6 bg-[#0072AA] rounded-lg border-2 border-[#005A87] shadow-xl text-center">
-            <p className="text-sm font-semibold mb-2 text-slate-300">3 Years Net Savings</p>
-            <p className="text-3xl font-bold mb-2" style={{ color: '#21AA47' }}>{formatCurrency(metrics.net_savings_3_years)}</p>
+          <div className="p-6 bg-[#32BF84] rounded-lg border-2 border-[#28A06A] shadow-xl text-center">
+            <p className="text-sm font-semibold mb-2 text-white">3 Years Net Savings</p>
+            <p className="text-3xl font-bold mb-2 text-white">{formatCurrency(metrics.net_savings_3_years)}</p>
           </div>
-          <div className="p-6 bg-[#0072AA] rounded-lg border-2 border-[#005A87] shadow-xl text-center">
-            <p className="text-sm font-semibold mb-2 text-slate-300">5 Years Net Savings</p>
-            <p className="text-3xl font-bold mb-2" style={{ color: '#21AA47' }}>{formatCurrency(metrics.net_savings_5_years)}</p>
+          <div className="p-6 bg-[#32BF84] rounded-lg border-2 border-[#28A06A] shadow-xl text-center">
+            <p className="text-sm font-semibold mb-2 text-white">5 Years Net Savings</p>
+            <p className="text-3xl font-bold mb-2 text-white">{formatCurrency(metrics.net_savings_5_years)}</p>
           </div>
         </div>
 
@@ -549,14 +552,14 @@ function CostBreakdownSection({
         <div className="flex justify-center gap-4">
           <button
             onClick={() => setShowModal(true)}
-            className="px-6 py-3 bg-[#0072AA] text-white rounded-lg font-semibold hover:bg-[#005A87] transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
+            className="px-6 py-3 bg-[#32BF84] text-white rounded-lg font-semibold hover:bg-[#28A06A] transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
           >
             <FileText className="w-5 h-5" />
             View Detailed Breakdown
           </button>
           <button
             onClick={() => setShowAssumptionsModal(true)}
-            className="px-6 py-3 bg-[#0072AA] text-white rounded-lg font-semibold hover:bg-[#005A87] transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
+            className="px-6 py-3 bg-[#32BF84] text-white rounded-lg font-semibold hover:bg-[#28A06A] transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
           >
             <FileText className="w-5 h-5" />
             View/Modify Cost Assumptions
@@ -684,7 +687,7 @@ function CostBreakdownSection({
                 {!isEditingAssumptions && (
                   <button
                     onClick={() => setIsEditingAssumptions(true)}
-                    className="px-6 py-2 bg-[#0072AA] text-white rounded-lg font-semibold hover:bg-[#005A87] transition-all duration-200 shadow-md hover:shadow-lg"
+                    className="px-6 py-2 bg-[#32BF84] text-white rounded-lg font-semibold hover:bg-[#28A06A] transition-all duration-200 shadow-md hover:shadow-lg"
                   >
                     Modify
                   </button>
@@ -811,7 +814,7 @@ function CostBreakdownSection({
                       setCostAssumptions(editableAssumptions);
                       setIsEditingAssumptions(false);
                     }}
-                    className="px-6 py-3 bg-[#0072AA] text-white rounded-lg font-semibold hover:bg-[#005A87] transition-all duration-200 shadow-md hover:shadow-lg"
+                    className="px-6 py-3 bg-[#32BF84] text-white rounded-lg font-semibold hover:bg-[#28A06A] transition-all duration-200 shadow-md hover:shadow-lg"
                   >
                     Apply
                   </button>
@@ -1102,10 +1105,10 @@ function MetricCard({
   color?: 'slate';
 }) {
   return (
-    <div className="p-6 bg-[#0072AA] rounded-lg border-2 border-[#005A87] shadow-xl text-center">
-      <p className="text-sm font-semibold mb-2 text-slate-300">{title}</p>
-      <p className="text-3xl font-bold mb-2" style={{ color: '#21AA47' }}>{value}</p>
-      <p className="text-xs text-slate-400">{subtitle}</p>
+    <div className="p-6 bg-[#32BF84] rounded-lg border-2 border-[#28A06A] shadow-xl text-center">
+      <p className="text-sm font-semibold mb-2 text-white">{title}</p>
+      <p className="text-3xl font-bold mb-2 text-white">{value}</p>
+      <p className="text-xs text-white">{subtitle}</p>
     </div>
   );
 }
