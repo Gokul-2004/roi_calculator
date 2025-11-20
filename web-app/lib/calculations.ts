@@ -159,8 +159,11 @@ export function calculateROIMetrics(
   // Year 3 ROI = (3 * Annual Savings) / (Implementation Cost + E-Signature Annual Cost) * 100
   const year3ROI = totalYear1Investment > 0 ? ((annual_savings * 3) / totalYear1Investment) * 100 : Infinity;
   
-  // Year 5 ROI = (5 * Annual Savings) / (Implementation Cost + E-Signature Annual Cost) * 100
-  const year5ROI = totalYear1Investment > 0 ? ((annual_savings * 5) / totalYear1Investment) * 100 : Infinity;
+  // Year 5 ROI = (5 * Annual Savings - Implementation Cost) / (5 * E-Signature Annual Cost + Implementation Cost) * 100
+  const fiveYearNetBenefit = annual_savings * 5 - implementation_cost;
+  const totalFiveYearInvestment = implementation_cost + esig_annual_cost * 5;
+  const year5ROI =
+    totalFiveYearInvestment > 0 ? (fiveYearNetBenefit / totalFiveYearInvestment) * 100 : Infinity;
 
   return {
     annual_savings_year2_plus: annual_savings,
