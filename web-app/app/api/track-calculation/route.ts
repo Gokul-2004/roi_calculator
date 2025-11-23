@@ -120,7 +120,10 @@ export async function POST(request: NextRequest) {
     const duration = Date.now() - startTime;
     console.log(`✅ [${requestId}] Successfully saved calculation in ${duration}ms`);
     console.log(`   Record ID: ${data.id}`);
-    console.log(`   Calculated at: ${data.calculated_at}\n`);
+    const calculatedDate = new Date(data.calculated_at);
+    const localTime = calculatedDate.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+    console.log(`   Calculated at (UTC): ${data.calculated_at}`);
+    console.log(`   Calculated at (IST): ${localTime}\n`);
 
     return NextResponse.json({ success: true, id: data.id, requestId });
   } catch (error: any) {
