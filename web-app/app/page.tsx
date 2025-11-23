@@ -98,14 +98,30 @@ export default function Home() {
     setShowCookieBanner(false);
   };
   const handleCalculate = async () => {
+    console.log('🧮 [Calculator] Starting calculation...');
+    console.log('   Input Parameters:', {
+      documents_per_year: inputs.documents_per_year,
+      pages_per_document: inputs.pages_per_document,
+      signatories_per_document: inputs.signatories_per_document,
+      staff_handling_documents: inputs.staff_handling_documents,
+      esig_annual_cost: inputs.esig_annual_cost,
+      implementation_cost: inputs.implementation_cost,
+    });
+    
     const annualCosts = calculateAnnualCosts(inputs, costAssumptions);
     const roiMetrics = calculateROIMetrics(inputs, annualCosts);
     const benefits = calculateBenefits(inputs);
     const newResults = { annualCosts, roiMetrics, benefits };
     setResults(newResults);
     
+    console.log('📊 [Calculator] Calculation complete:');
+    console.log('   Annual Savings:', formatCurrency(annualCosts.annual_savings));
+    console.log('   Year 1 ROI:', `${roiMetrics.year1_roi_percent.toFixed(1)}%`);
+    
     // Automatically track calculation with IP address
+    console.log('📡 [Calculator] Attempting to track calculation...');
     try {
+      const trackingStartTime = Date.now();
       const response = await fetch('/api/track-calculation', {
         method: 'POST',
         headers: {
@@ -117,17 +133,37 @@ export default function Home() {
         }),
       });
       
+      const trackingDuration = Date.now() - trackingStartTime;
+      
       if (response.ok) {
         const data = await response.json();
-        console.log('✅ Calculation tracked successfully:', data.id);
+        if (data.trackingDisabled) {
+          console.warn('⚠️  [Calculator] Tracking is disabled (Supabase env vars missing)');
+        } else {
+          console.log(`✅ [Calculator] Calculation tracked successfully in ${trackingDuration}ms`);
+          console.log('   Record ID:', data.id);
+          if (data.requestId) {
+            console.log('   Request ID:', data.requestId);
+          }
+        }
       } else {
         const error = await response.json();
-        console.error('❌ Failed to track calculation:', error);
-        console.error('Error details:', JSON.stringify(error, null, 2));
+        console.error(`❌ [Calculator] Tracking failed after ${trackingDuration}ms:`);
+        console.error('   Status:', response.status);
+        console.error('   Error:', error.error || 'Unknown error');
+        console.error('   Details:', error.details || 'No details');
+        console.error('   Hint:', error.hint || 'No hint');
+        if (error.requestId) {
+          console.error('   Request ID:', error.requestId, '(check server logs for this ID)');
+        }
+        console.error('   Full error response:', JSON.stringify(error, null, 2));
       }
-    } catch (error) {
-      // Silently fail - tracking shouldn't break the user experience
-      console.error('❌ Failed to track calculation:', error);
+    } catch (error: any) {
+      // Network error (fetch failed, CORS, etc.)
+      console.error('❌ [Calculator] Network error while tracking:');
+      console.error('   Error Type:', error.constructor.name);
+      console.error('   Error Message:', error.message);
+      console.error('   This usually means the API route is unreachable or there\'s a network issue.');
     }
   };
 
