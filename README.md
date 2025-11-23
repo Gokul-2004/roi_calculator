@@ -46,6 +46,7 @@ A modern, interactive web application built with Next.js to calculate and compar
      NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
      NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
      ```
+   - If you skip this step, the calculator UI will still work, but the optional `/api/track-calculation` endpoint will log a warning and skip saving activity (to avoid runtime errors for contributors who don’t have Supabase credentials yet).
 
 5. **Run the development server**
    ```bash
