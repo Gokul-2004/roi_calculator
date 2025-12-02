@@ -580,7 +580,7 @@ function CostBreakdownSection({
             </span>
           </p>
           <p className="text-xs text-slate-500">
-            Time required to recover the one-time implementation cost from annual savings
+            Your investment breaks even in {metrics.payback_period_months.toFixed(2)} months, showing rapid cost recovery and efficiency gains
           </p>
         </div>
 
