@@ -574,7 +574,7 @@ function CostBreakdownSection({
         {/* Row 1 Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           {/* Old Annual Cost - Paper-Based */}
-          <div className="p-6 bg-white rounded-lg border border-slate-200 shadow-md text-center">
+          <div className="p-6 bg-slate-50 rounded-lg border border-slate-200 shadow-md text-center">
             <p className="text-sm font-semibold mb-2 text-slate-700">Paper-Based</p>
             <p className="text-3xl font-bold mb-2 text-red-600">
               {formatCurrency(costs.total_paper_cost)}
@@ -583,7 +583,7 @@ function CostBreakdownSection({
           </div>
 
           {/* New Annual Cost - E-Signature */}
-          <div className="p-6 bg-white rounded-lg border border-slate-200 shadow-md text-center">
+          <div className="p-6 bg-slate-50 rounded-lg border border-slate-200 shadow-md text-center">
             <p className="text-sm font-semibold mb-2 text-slate-700">E-Signature</p>
             <p className="text-3xl font-bold mb-2" style={{ color: '#32BF84' }}>
               {formatCurrency(costs.total_esig_cost)}
@@ -592,7 +592,7 @@ function CostBreakdownSection({
           </div>
 
           {/* Annual Savings (after implementation) */}
-          <div className="p-6 bg-white rounded-lg border border-slate-200 shadow-md text-center relative">
+          <div className="p-6 bg-slate-50 rounded-lg border border-slate-200 shadow-md text-center relative">
             <div className="absolute -top-3 inset-x-0 flex justify-center">
               <span className="inline-block px-3 py-1 text-xs font-semibold text-white rounded-full shadow-sm" style={{ backgroundColor: '#32BF84' }}>
                 Net Annual Gain
@@ -606,7 +606,7 @@ function CostBreakdownSection({
           </div>
 
           {/* Breakeven Period Card */}
-          <div className="p-6 bg-white rounded-lg border border-slate-200 shadow-md text-center">
+          <div className="p-6 bg-slate-50 rounded-lg border border-slate-200 shadow-md text-center">
             <p className="text-sm font-semibold mb-2 text-slate-700">
               Breakeven Period
             </p>
@@ -637,13 +637,13 @@ function CostBreakdownSection({
             subtitle="Cumulative 5 years"
             color="slate"
           />
-          <div className="p-6 bg-white rounded-lg border border-slate-200 shadow-md text-center">
+          <div className="p-6 bg-slate-50 rounded-lg border border-slate-200 shadow-md text-center">
             <p className="text-sm font-semibold mb-2 text-slate-700">3 Years Net Savings</p>
             <p className="text-3xl font-bold mb-2" style={{ color: '#32BF84' }}>
               {formatCurrency(metrics.net_savings_3_years)}
             </p>
           </div>
-          <div className="p-6 bg-white rounded-lg border border-slate-200 shadow-md text-center">
+          <div className="p-6 bg-slate-50 rounded-lg border border-slate-200 shadow-md text-center">
             <p className="text-sm font-semibold mb-2 text-slate-700">5 Years Net Savings</p>
             <p className="text-3xl font-bold mb-2" style={{ color: '#32BF84' }}>
               {formatCurrency(metrics.net_savings_5_years)}
@@ -741,6 +741,23 @@ function CostBreakdownSection({
                   paper={0}
                   esig={costs.software_subscription}
                   savings={-costs.software_subscription}
+                />
+                {/* Totals Row */}
+                <CostItem
+                  label="Total"
+                  paper={
+                    (costs.paper_printing || 0) +
+                    (costs.storage_filing || 0) +
+                    (costs.paper_staff_time || 0) +
+                    (costs.doc_loss_recreation || 0) +
+                    (costs.paper_compliance_audit || 0)
+                  }
+                  esig={
+                    (costs.esig_staff_time || 0) +
+                    (costs.esig_compliance_audit || 0) +
+                    (costs.software_subscription || 0)
+                  }
+                  savings={adjustedAnnualSavings}
                 />
                 <CostItem
                   label="Implementation Cost (across 5 years)"
