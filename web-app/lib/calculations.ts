@@ -77,11 +77,13 @@ export function calculateAnnualCosts(
   inputParams: InputParams,
   costAssumptions: CostAssumptions
 ): AnnualCosts {
-  const {
-    documents_per_year: docsPerYear,
-    pages_per_document: pagesPerDoc,
-    esig_annual_cost,
-  } = inputParams;
+  // Safely coerce any NaN/invalid numeric inputs to 0
+  const sanitize = (value: number): number =>
+    typeof value === 'number' && Number.isFinite(value) ? value : 0;
+
+  const docsPerYear = sanitize(inputParams.documents_per_year);
+  const pagesPerDoc = sanitize(inputParams.pages_per_document);
+  const esig_annual_cost = sanitize(inputParams.esig_annual_cost);
 
   // Paper-Based Costs
   const paperPrinting = docsPerYear * pagesPerDoc * costAssumptions.paper_cost_per_page;
@@ -141,8 +143,12 @@ export function calculateROIMetrics(
   inputParams: InputParams,
   annualCosts: AnnualCosts
 ): ROIMetrics {
-  const { implementation_cost, implementation_timeline_months, esig_annual_cost } = inputParams;
-  const { annual_savings } = annualCosts;
+  const sanitize = (value: number): number =>
+    typeof value === 'number' && Number.isFinite(value) ? value : 0;
+
+  const implementation_cost = sanitize(inputParams.implementation_cost);
+  const esig_annual_cost = sanitize(inputParams.esig_annual_cost);
+  const annual_savings = sanitize(annualCosts.annual_savings);
 
   // Breakeven Period:
   // =(E-Signature annual cost + Implementation cost / 5) / (Annual savings / 12)

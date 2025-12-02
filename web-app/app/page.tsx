@@ -437,13 +437,26 @@ function InputField({
   type?: string;
   step?: string;
 }) {
+  // Allow the user to clear the field visually without immediately forcing 0.
+  // Internally we still work with numbers; empty/NaN is treated as 0 at calculation time.
+  const displayValue = Number.isNaN(value) ? '' : value;
+
   return (
     <div className="group">
       <label className="block text-sm font-semibold text-slate-700 mb-2">{label}</label>
       <input
         type={type}
-        value={value}
-        onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+        value={displayValue}
+        onChange={(e) => {
+          const raw = e.target.value;
+          if (raw === '') {
+            // Keep input visually empty, but internally represent as NaN
+            onChange(NaN as unknown as number);
+          } else {
+            const parsed = parseFloat(raw);
+            onChange(Number.isNaN(parsed) ? (NaN as unknown as number) : parsed);
+          }
+        }}
         step={step}
         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-400 focus:border-slate-500 bg-white text-slate-900 font-semibold transition-all duration-200 hover:border-slate-400 shadow-sm"
       />
