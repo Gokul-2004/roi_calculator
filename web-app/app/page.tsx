@@ -557,38 +557,43 @@ function CostBreakdownSection({
 
         {/* Row 1 Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-          <div className="p-6 bg-[#32BF84] rounded-lg border-2 border-[#28A06A] shadow-xl text-center">
+          {/* Old Annual Cost - Paper-Based */}
+          <div className="p-6 bg-red-600 rounded-lg border-2 border-red-700 shadow-xl text-center">
             <p className="text-sm font-semibold mb-2 text-white">Paper-Based</p>
             <p className="text-3xl font-bold mb-2 text-white">{formatCurrency(costs.total_paper_cost)}</p>
-            <p className="text-xs text-white">Total annual cost</p>
+            <p className="text-xs text-white">Old annual cost</p>
           </div>
-          <div className="p-6 bg-[#32BF84] rounded-lg border-2 border-[#28A06A] shadow-xl text-center">
+
+          {/* New Annual Cost - E-Signature */}
+          <div className="p-6 bg-sky-600 rounded-lg border-2 border-sky-700 shadow-xl text-center">
             <p className="text-sm font-semibold mb-2 text-white">E-Signature</p>
             <p className="text-3xl font-bold mb-2 text-white">{formatCurrency(costs.total_esig_cost)}</p>
-            <p className="text-xs text-white">Total annual cost</p>
+            <p className="text-xs text-white">New annual cost</p>
           </div>
+
+          {/* Annual Savings (after implementation) */}
           <div className="p-6 bg-[#32BF84] rounded-lg border-2 border-[#28A06A] shadow-xl text-center">
             <p className="text-sm font-semibold mb-2 text-white">Annual Savings</p>
             <p className="text-3xl font-bold mb-2 text-white">{formatCurrency(adjustedAnnualSavings)}</p>
             <p className="text-xs text-white">You save this much (after implementation)</p>
           </div>
-          <MetricCard
-            title="Net Benefit - Year 1"
-            value={formatCurrency(metrics.net_benefit_year1)}
-            subtitle="Savings minus implementation"
-            color="slate"
-          />
-        </div>
 
-        {/* Breakeven Period between Row 1 and Row 2 */}
-        <div className="mb-4 text-center">
-          <p className="text-lg font-semibold" style={{ color: '#32BF84' }}>
-            Your investment breaks even in{' '}
-            <span className="font-bold">
+          {/* Breakeven Period Card */}
+          <div className="p-6 bg-white rounded-lg border-2 border-[#32BF84] shadow-xl text-center">
+            <p className="text-sm font-semibold mb-2" style={{ color: '#32BF84' }}>
+              Breakeven Period
+            </p>
+            <p className="text-3xl font-bold mb-2" style={{ color: '#32BF84' }}>
               {metrics.payback_period_months.toFixed(2)} months
-            </span>
-            , showing rapid cost recovery and efficiency gains
-          </p>
+            </p>
+            <p className="text-xs text-slate-600">
+              Your investment breaks even in{' '}
+              <span className="font-semibold" style={{ color: '#16a34a' }}>
+                {metrics.payback_period_months.toFixed(2)} months
+              </span>
+              , showing rapid cost recovery and efficiency gains
+            </p>
+          </div>
         </div>
 
         {/* Row 2 Cards */}
