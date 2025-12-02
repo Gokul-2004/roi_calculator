@@ -144,7 +144,14 @@ export function calculateROIMetrics(
   const { implementation_cost, implementation_timeline_months, esig_annual_cost } = inputParams;
   const { annual_savings } = annualCosts;
 
-  const paybackPeriod = annual_savings > 0 ? (implementation_cost / annual_savings) * 12 : Infinity;
+  // Breakeven Period:
+  // =(E-Signature annual cost + Implementation cost / 5) / (Annual savings / 12)
+  // i.e. months = (esig_annual_cost + implementation_cost/5) / monthly_savings
+  const monthlySavings = annual_savings / 12;
+  const paybackPeriod =
+    monthlySavings > 0
+      ? (esig_annual_cost + implementation_cost / 5) / monthlySavings
+      : Infinity;
   const netBenefitYear1 = annual_savings - implementation_cost;
   
   // All ROI calculations use: Cumulative Savings / (Implementation Cost + E-Signature Annual Cost) * 100
