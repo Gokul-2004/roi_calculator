@@ -296,7 +296,7 @@ export default function Home() {
 
       {/* Right Side - Results (Scrollable) */}
       <div className="lg:pl-[286px]">
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 pt-[144px] pb-8">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
           <main className="space-y-6">
             {/* Results */}
             {results ? (
