@@ -558,29 +558,35 @@ function CostBreakdownSection({
         {/* Row 1 Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           {/* Old Annual Cost - Paper-Based */}
-          <div className="p-6 bg-red-600 rounded-lg border-2 border-red-700 shadow-xl text-center">
-            <p className="text-sm font-semibold mb-2 text-white">Paper-Based</p>
-            <p className="text-3xl font-bold mb-2 text-white">{formatCurrency(costs.total_paper_cost)}</p>
-            <p className="text-xs text-white">Old annual cost</p>
+          <div className="p-6 bg-white rounded-lg border border-slate-200 shadow-md text-center">
+            <p className="text-sm font-semibold mb-2 text-slate-700">Paper-Based</p>
+            <p className="text-3xl font-bold mb-2 text-red-600">
+              {formatCurrency(costs.total_paper_cost)}
+            </p>
+            <p className="text-xs text-slate-500">Old annual cost</p>
           </div>
 
           {/* New Annual Cost - E-Signature */}
-          <div className="p-6 bg-sky-600 rounded-lg border-2 border-sky-700 shadow-xl text-center">
-            <p className="text-sm font-semibold mb-2 text-white">E-Signature</p>
-            <p className="text-3xl font-bold mb-2 text-white">{formatCurrency(costs.total_esig_cost)}</p>
-            <p className="text-xs text-white">New annual cost</p>
+          <div className="p-6 bg-white rounded-lg border border-slate-200 shadow-md text-center">
+            <p className="text-sm font-semibold mb-2 text-slate-700">E-Signature</p>
+            <p className="text-3xl font-bold mb-2 text-slate-900">
+              {formatCurrency(costs.total_esig_cost)}
+            </p>
+            <p className="text-xs text-slate-500">New annual cost</p>
           </div>
 
           {/* Annual Savings (after implementation) */}
-          <div className="p-6 bg-[#32BF84] rounded-lg border-2 border-[#28A06A] shadow-xl text-center">
-            <p className="text-sm font-semibold mb-2 text-white">Annual Savings</p>
-            <p className="text-3xl font-bold mb-2 text-white">{formatCurrency(adjustedAnnualSavings)}</p>
-            <p className="text-xs text-white">You save this much (after implementation)</p>
+          <div className="p-6 bg-white rounded-lg border border-slate-200 shadow-md text-center">
+            <p className="text-sm font-semibold mb-2 text-slate-700">Annual Savings</p>
+            <p className="text-3xl font-bold mb-2" style={{ color: '#32BF84' }}>
+              {formatCurrency(adjustedAnnualSavings)}
+            </p>
+            <p className="text-xs text-slate-500">You save this much (after implementation)</p>
           </div>
 
           {/* Breakeven Period Card */}
-          <div className="p-6 bg-white rounded-lg border-2 border-[#32BF84] shadow-xl text-center">
-            <p className="text-sm font-semibold mb-2" style={{ color: '#32BF84' }}>
+          <div className="p-6 bg-white rounded-lg border border-slate-200 shadow-md text-center">
+            <p className="text-sm font-semibold mb-2 text-slate-700">
               Breakeven Period
             </p>
             <p className="text-3xl font-bold mb-2" style={{ color: '#32BF84' }}>
@@ -610,13 +616,17 @@ function CostBreakdownSection({
             subtitle="Cumulative 5 years"
             color="slate"
           />
-          <div className="p-6 bg-[#32BF84] rounded-lg border-2 border-[#28A06A] shadow-xl text-center">
-            <p className="text-sm font-semibold mb-2 text-white">3 Years Net Savings</p>
-            <p className="text-3xl font-bold mb-2 text-white">{formatCurrency(metrics.net_savings_3_years)}</p>
+          <div className="p-6 bg-white rounded-lg border border-slate-200 shadow-md text-center">
+            <p className="text-sm font-semibold mb-2 text-slate-700">3 Years Net Savings</p>
+            <p className="text-3xl font-bold mb-2" style={{ color: '#32BF84' }}>
+              {formatCurrency(metrics.net_savings_3_years)}
+            </p>
           </div>
-          <div className="p-6 bg-[#32BF84] rounded-lg border-2 border-[#28A06A] shadow-xl text-center">
-            <p className="text-sm font-semibold mb-2 text-white">5 Years Net Savings</p>
-            <p className="text-3xl font-bold mb-2 text-white">{formatCurrency(metrics.net_savings_5_years)}</p>
+          <div className="p-6 bg-white rounded-lg border border-slate-200 shadow-md text-center">
+            <p className="text-sm font-semibold mb-2 text-slate-700">5 Years Net Savings</p>
+            <p className="text-3xl font-bold mb-2" style={{ color: '#32BF84' }}>
+              {formatCurrency(metrics.net_savings_5_years)}
+            </p>
           </div>
         </div>
 
