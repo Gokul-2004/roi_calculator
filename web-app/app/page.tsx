@@ -542,11 +542,11 @@ function CostBreakdownSection({
     }
   }, [showAssumptionsModal, costAssumptions]);
 
-  // Annual savings adjusted to include implementation cost spread across 5 years
-  const adjustedAnnualSavings = costs.annual_savings - metrics.implementation_cost / 5;
+  // Annual savings (does NOT subtract implementation cost)
+  const annualSavings = costs.annual_savings;
   const savingsPercent =
     costs.total_paper_cost > 0
-      ? (adjustedAnnualSavings / costs.total_paper_cost) * 100
+      ? (annualSavings / costs.total_paper_cost) * 100
       : 0;
 
   return (
@@ -562,7 +562,7 @@ function CostBreakdownSection({
         {/* Big Savings Highlight */}
         <div className="mb-6 text-center">
           <p className="inline-block px-4 py-2 text-2xl font-extrabold rounded-full shadow-sm border" style={{ color: '#32BF84', borderColor: '#32BF84' }}>
-            You could be saving {formatCurrency(adjustedAnnualSavings)} every year
+            You could be saving {formatCurrency(annualSavings)} every year
           </p>
           {savingsPercent > 0 && (
             <p className="text-sm text-slate-600 mt-2">
@@ -605,7 +605,7 @@ function CostBreakdownSection({
               Annual Savings
             </p>
             <p className="text-3xl font-extrabold mb-2" style={{ color: '#16a34a' }}>
-              {formatCurrency(adjustedAnnualSavings)}
+              {formatCurrency(annualSavings)}
             </p>
             <p className="text-xs font-semibold" style={{ color: '#166534' }}>
               You save this much (after implementation)
@@ -618,7 +618,7 @@ function CostBreakdownSection({
               Breakeven Period
             </p>
             <p className="text-3xl font-bold mb-2" style={{ color: '#32BF84' }}>
-              {metrics.payback_period_months.toFixed(2)} months
+              {metrics.payback_period_months.toFixed(1)} months
             </p>
             <p className="text-xs text-slate-600">
               Rapid cost recovery and efficiency gains
@@ -631,7 +631,7 @@ function CostBreakdownSection({
           <MetricCard
             title="Year 1 ROI (%)"
             value={`${metrics.year1_roi_percent.toFixed(1)}%`}
-            subtitle="Year 1 ROI—first year return (after implementation)"
+            subtitle="Year 1 ROI"
             color="slate"
           />
           <MetricCard
@@ -641,16 +641,18 @@ function CostBreakdownSection({
             color="slate"
           />
           <div className="p-6 bg-slate-100 rounded-lg border border-slate-200 shadow-md text-center">
-            <p className="text-sm font-semibold mb-2 text-slate-700">3 Years Net Savings</p>
-            <p className="text-3xl font-bold mb-2" style={{ color: '#32BF84' }}>
+            <p className="text-sm font-semibold mb-1 text-slate-700">3 Years Net Savings</p>
+            <p className="text-3xl font-bold mb-1" style={{ color: '#32BF84' }}>
               {formatCurrency(metrics.net_savings_3_years)}
             </p>
+            <p className="text-xs text-slate-600">Total savings over 3 years</p>
           </div>
           <div className="p-6 bg-slate-100 rounded-lg border border-slate-200 shadow-md text-center">
-            <p className="text-sm font-semibold mb-2 text-slate-700">5 Years Net Savings</p>
-            <p className="text-3xl font-bold mb-2" style={{ color: '#32BF84' }}>
+            <p className="text-sm font-semibold mb-1 text-slate-700">5 Years Net Savings</p>
+            <p className="text-3xl font-bold mb-1" style={{ color: '#32BF84' }}>
               {formatCurrency(metrics.net_savings_5_years)}
             </p>
+            <p className="text-xs text-slate-600">Total savings over 5 years</p>
           </div>
         </div>
 
@@ -751,7 +753,7 @@ function CostBreakdownSection({
                   esig={metrics.implementation_cost / 5}
                   savings={-metrics.implementation_cost / 5}
                 />
-                {/* Totals Row (including implementation spread across 5 years) */}
+                {/* Totals Row */}
                 <CostItem
                   label="Total"
                   paper={
@@ -764,10 +766,9 @@ function CostBreakdownSection({
                   esig={
                     (costs.esig_staff_time || 0) +
                     (costs.esig_compliance_audit || 0) +
-                    (costs.software_subscription || 0) +
-                    metrics.implementation_cost / 5
+                    (costs.software_subscription || 0)
                   }
-                  savings={adjustedAnnualSavings}
+                  savings={annualSavings}
                 />
               </div>
             </div>
