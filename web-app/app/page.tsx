@@ -585,7 +585,7 @@ function CostBreakdownSection({
           {/* New Annual Cost - E-Signature */}
           <div className="p-6 bg-white rounded-lg border border-slate-200 shadow-md text-center">
             <p className="text-sm font-semibold mb-2 text-slate-700">E-Signature</p>
-            <p className="text-3xl font-bold mb-2 text-slate-900">
+            <p className="text-3xl font-bold mb-2" style={{ color: '#32BF84' }}>
               {formatCurrency(costs.total_esig_cost)}
             </p>
             <p className="text-xs text-slate-500">New annual cost</p>
