@@ -573,7 +573,7 @@ function CostBreakdownSection({
 
         {/* Breakeven Period between Row 1 and Row 2 */}
         <div className="mb-4 text-center">
-          <p className="text-base font-semibold" style={{ color: '#32BF84' }}>
+          <p className="text-lg font-semibold" style={{ color: '#32BF84' }}>
             Your investment breaks even in{' '}
             <span className="font-bold">
               {metrics.payback_period_months.toFixed(2)} months
