@@ -561,11 +561,11 @@ function CostBreakdownSection({
 
         {/* Big Savings Highlight */}
         <div className="mb-6 text-center">
-          <p className="text-xl font-bold" style={{ color: '#32BF84' }}>
+          <p className="inline-block px-4 py-2 text-2xl font-extrabold rounded-full shadow-sm border" style={{ color: '#32BF84', borderColor: '#32BF84' }}>
             You could be saving {formatCurrency(adjustedAnnualSavings)} every year
           </p>
           {savingsPercent > 0 && (
-            <p className="text-sm text-slate-600 mt-1">
+            <p className="text-sm text-slate-600 mt-2">
               That&apos;s roughly {savingsPercent.toFixed(1)}% of your current paper-based annual spend
             </p>
           )}
@@ -614,11 +614,7 @@ function CostBreakdownSection({
               {metrics.payback_period_months.toFixed(2)} months
             </p>
             <p className="text-xs text-slate-600">
-              Your investment breaks even in{' '}
-              <span className="font-semibold" style={{ color: '#16a34a' }}>
-                {metrics.payback_period_months.toFixed(2)} months
-              </span>
-              , showing rapid cost recovery and efficiency gains
+              Rapid cost recovery and efficiency gains
             </p>
           </div>
         </div>
