@@ -573,14 +573,12 @@ function CostBreakdownSection({
 
         {/* Breakeven Period between Row 1 and Row 2 */}
         <div className="mb-4 text-center">
-          <p className="text-base font-semibold text-slate-700">
-            Breakeven Period:{' '}
+          <p className="text-sm text-slate-700">
+            Your investment breaks even in{' '}
             <span className="font-bold">
               {metrics.payback_period_months.toFixed(2)} months
             </span>
-          </p>
-          <p className="text-xs text-slate-500">
-            Your investment breaks even in {metrics.payback_period_months.toFixed(2)} months, showing rapid cost recovery and efficiency gains
+            , showing rapid cost recovery and efficiency gains
           </p>
         </div>
 
