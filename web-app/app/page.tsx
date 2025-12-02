@@ -520,6 +520,9 @@ function CostBreakdownSection({
     }
   }, [showAssumptionsModal, costAssumptions]);
 
+  // Annual savings adjusted to include implementation cost spread across 5 years
+  const adjustedAnnualSavings = costs.annual_savings - metrics.implementation_cost / 5;
+
   return (
     <>
       <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-8">
@@ -545,8 +548,8 @@ function CostBreakdownSection({
           </div>
           <div className="p-6 bg-[#32BF84] rounded-lg border-2 border-[#28A06A] shadow-xl text-center">
             <p className="text-sm font-semibold mb-2 text-white">Annual Savings</p>
-            <p className="text-3xl font-bold mb-2 text-white">{formatCurrency(costs.annual_savings)}</p>
-            <p className="text-xs text-white">You save this much!</p>
+            <p className="text-3xl font-bold mb-2 text-white">{formatCurrency(adjustedAnnualSavings)}</p>
+            <p className="text-xs text-white">You save this much (after implementation)</p>
           </div>
           <MetricCard
             title="Net Benefit - Year 1"
@@ -575,6 +578,19 @@ function CostBreakdownSection({
             <p className="text-sm font-semibold mb-2 text-white">5 Years Net Savings</p>
             <p className="text-3xl font-bold mb-2 text-white">{formatCurrency(metrics.net_savings_5_years)}</p>
           </div>
+        </div>
+
+        {/* Breakeven Period */}
+        <div className="mb-6 text-center">
+          <p className="text-sm font-semibold text-slate-700">
+            Breakeven Period:{' '}
+            <span className="font-bold">
+              {metrics.payback_period_months.toFixed(2)} months
+            </span>
+          </p>
+          <p className="text-xs text-slate-500">
+            Time required to recover the one-time implementation cost from annual savings
+          </p>
         </div>
 
         {/* Buttons */}
@@ -667,6 +683,12 @@ function CostBreakdownSection({
                   paper={0}
                   esig={costs.software_subscription}
                   savings={-costs.software_subscription}
+                />
+                <CostItem
+                  label="Implementation Cost (across 5 years)"
+                  paper={0}
+                  esig={metrics.implementation_cost / 5}
+                  savings={-metrics.implementation_cost / 5}
                 />
               </div>
             </div>
