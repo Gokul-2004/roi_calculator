@@ -546,9 +546,8 @@ function CostBreakdownSection({
           <h2 className="text-2xl font-bold text-slate-900">Annual Cost Breakdown</h2>
         </div>
 
-        {/* All 8 Cards in 4x2 Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {/* Row 1 */}
+        {/* Row 1 Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           <div className="p-6 bg-[#32BF84] rounded-lg border-2 border-[#28A06A] shadow-xl text-center">
             <p className="text-sm font-semibold mb-2 text-white">Paper-Based</p>
             <p className="text-3xl font-bold mb-2 text-white">{formatCurrency(costs.total_paper_cost)}</p>
@@ -570,7 +569,23 @@ function CostBreakdownSection({
             subtitle="Savings minus implementation"
             color="slate"
           />
-          {/* Row 2 */}
+        </div>
+
+        {/* Breakeven Period between Row 1 and Row 2 */}
+        <div className="mb-4 text-center">
+          <p className="text-sm font-semibold text-slate-700">
+            Breakeven Period:{' '}
+            <span className="font-bold">
+              {metrics.payback_period_months.toFixed(2)} months
+            </span>
+          </p>
+          <p className="text-xs text-slate-500">
+            Time required to recover the one-time implementation cost from annual savings
+          </p>
+        </div>
+
+        {/* Row 2 Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <MetricCard
             title="Year 1 ROI (%)"
             value={`${metrics.year1_roi_percent.toFixed(1)}%`}
@@ -591,19 +606,6 @@ function CostBreakdownSection({
             <p className="text-sm font-semibold mb-2 text-white">5 Years Net Savings</p>
             <p className="text-3xl font-bold mb-2 text-white">{formatCurrency(metrics.net_savings_5_years)}</p>
           </div>
-        </div>
-
-        {/* Breakeven Period */}
-        <div className="mb-6 text-center">
-          <p className="text-sm font-semibold text-slate-700">
-            Breakeven Period:{' '}
-            <span className="font-bold">
-              {metrics.payback_period_months.toFixed(2)} months
-            </span>
-          </p>
-          <p className="text-xs text-slate-500">
-            Time required to recover the one-time implementation cost from annual savings
-          </p>
         </div>
 
         {/* Buttons */}
