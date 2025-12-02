@@ -268,6 +268,7 @@ export default function Home() {
               onChange={(v) => setInputs({ ...inputs, signatories_per_document: v })}
               type="number"
               step="1"
+              disabled
             />
             <InputField
               label="E-Signature Solution Annual Cost (₹)"
@@ -360,6 +361,7 @@ export default function Home() {
               onChange={(v) => setInputs({ ...inputs, signatories_per_document: v })}
               type="number"
               step="1"
+              disabled
             />
             <InputField
               label="E-Signature Solution Annual Cost (₹)"
@@ -430,12 +432,14 @@ function InputField({
   onChange,
   type = 'number',
   step,
+  disabled = false,
 }: {
   label: string;
   value: number;
   onChange: (value: number) => void;
   type?: string;
   step?: string;
+  disabled?: boolean;
 }) {
   // Allow the user to clear the field visually without immediately forcing 0.
   // Internally we still work with numbers; empty/NaN is treated as 0 at calculation time.
@@ -447,6 +451,7 @@ function InputField({
       <input
         type={type}
         value={displayValue}
+        disabled={disabled}
         onChange={(e) => {
           const raw = e.target.value;
           if (raw === '') {
@@ -458,7 +463,11 @@ function InputField({
           }
         }}
         step={step}
-        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-400 focus:border-slate-500 bg-white text-slate-900 font-semibold transition-all duration-200 hover:border-slate-400 shadow-sm"
+        className={`w-full px-4 py-3 border rounded-lg bg-white text-slate-900 font-semibold transition-all duration-200 shadow-sm ${
+          disabled
+            ? 'border-slate-200 text-slate-500 bg-slate-50 cursor-not-allowed'
+            : 'border-slate-300 focus:ring-2 focus:ring-slate-400 focus:border-slate-500 hover:border-slate-400'
+        }`}
       />
     </div>
   );
