@@ -742,7 +742,13 @@ function CostBreakdownSection({
                   esig={costs.software_subscription}
                   savings={-costs.software_subscription}
                 />
-                {/* Totals Row */}
+                <CostItem
+                  label="Implementation Cost (across 5 years)"
+                  paper={0}
+                  esig={metrics.implementation_cost / 5}
+                  savings={-metrics.implementation_cost / 5}
+                />
+                {/* Totals Row (including implementation spread across 5 years) */}
                 <CostItem
                   label="Total"
                   paper={
@@ -755,15 +761,10 @@ function CostBreakdownSection({
                   esig={
                     (costs.esig_staff_time || 0) +
                     (costs.esig_compliance_audit || 0) +
-                    (costs.software_subscription || 0)
+                    (costs.software_subscription || 0) +
+                    metrics.implementation_cost / 5
                   }
                   savings={adjustedAnnualSavings}
-                />
-                <CostItem
-                  label="Implementation Cost (across 5 years)"
-                  paper={0}
-                  esig={metrics.implementation_cost / 5}
-                  savings={-metrics.implementation_cost / 5}
                 />
               </div>
             </div>
