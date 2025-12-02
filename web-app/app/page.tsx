@@ -612,15 +612,15 @@ function CostBreakdownSection({
             </p>
           </div>
 
-          {/* Breakeven Period Card */}
-          <div className="p-6 bg-emerald-50 rounded-lg border-2 shadow-md text-center" style={{ borderColor: '#32BF84' }}>
-            <p className="text-sm font-semibold mb-2" style={{ color: '#166534' }}>
+          {/* Breakeven Period Card (neutral grey) */}
+          <div className="p-6 bg-slate-100 rounded-lg border border-slate-200 shadow-md text-center">
+            <p className="text-sm font-semibold mb-2 text-slate-700">
               Breakeven Period
             </p>
-            <p className="text-3xl font-bold mb-2" style={{ color: '#16a34a' }}>
+            <p className="text-3xl font-bold mb-2" style={{ color: '#32BF84' }}>
               {metrics.payback_period_months.toFixed(2)} months
             </p>
-            <p className="text-xs font-semibold" style={{ color: '#166534' }}>
+            <p className="text-xs text-slate-600">
               Rapid cost recovery and efficiency gains
             </p>
           </div>
