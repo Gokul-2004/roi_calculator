@@ -544,6 +544,10 @@ function CostBreakdownSection({
 
   // Annual savings adjusted to include implementation cost spread across 5 years
   const adjustedAnnualSavings = costs.annual_savings - metrics.implementation_cost / 5;
+  const savingsPercent =
+    costs.total_paper_cost > 0
+      ? (adjustedAnnualSavings / costs.total_paper_cost) * 100
+      : 0;
 
   return (
     <>
@@ -553,6 +557,18 @@ function CostBreakdownSection({
             <span className="text-2xl font-bold text-white">₹</span>
           </div>
           <h2 className="text-2xl font-bold text-slate-900">Annual Cost Breakdown</h2>
+        </div>
+
+        {/* Big Savings Highlight */}
+        <div className="mb-6 text-center">
+          <p className="text-lg font-bold" style={{ color: '#32BF84' }}>
+            You could be saving {formatCurrency(adjustedAnnualSavings)} every year
+          </p>
+          {savingsPercent > 0 && (
+            <p className="text-xs text-slate-500 mt-1">
+              That&apos;s roughly {savingsPercent.toFixed(1)}% of your current paper-based annual spend
+            </p>
+          )}
         </div>
 
         {/* Row 1 Cards */}
@@ -1193,10 +1209,12 @@ function MetricCard({
   color?: 'slate';
 }) {
   return (
-    <div className="p-6 bg-[#32BF84] rounded-lg border-2 border-[#28A06A] shadow-xl text-center">
-      <p className="text-sm font-semibold mb-2 text-white">{title}</p>
-      <p className="text-3xl font-bold mb-2 text-white">{value}</p>
-      <p className="text-xs text-white">{subtitle}</p>
+    <div className="p-6 bg-white rounded-lg border border-slate-200 shadow-md text-center">
+      <p className="text-sm font-semibold mb-2 text-slate-700">{title}</p>
+      <p className="text-3xl font-bold mb-2" style={{ color: '#32BF84' }}>
+        {value}
+      </p>
+      <p className="text-xs text-slate-500">{subtitle}</p>
     </div>
   );
 }
