@@ -573,7 +573,7 @@ function CostBreakdownSection({
 
         {/* Breakeven Period between Row 1 and Row 2 */}
         <div className="mb-4 text-center">
-          <p className="text-sm font-semibold text-slate-700">
+          <p className="text-base font-semibold text-slate-700">
             Breakeven Period:{' '}
             <span className="font-bold">
               {metrics.payback_period_months.toFixed(2)} months
