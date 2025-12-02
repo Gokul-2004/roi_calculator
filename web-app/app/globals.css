@@ -25,6 +25,17 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Remove number input spinners for a cleaner numeric look */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 /* Custom Slider Styles */
 input[type="range"].slider::-webkit-slider-thumb {
   appearance: none;
