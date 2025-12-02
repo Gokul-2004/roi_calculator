@@ -591,18 +591,25 @@ function CostBreakdownSection({
             <p className="text-xs text-slate-500">New annual cost</p>
           </div>
 
-          {/* Annual Savings (after implementation) */}
-          <div className="p-6 bg-slate-100 rounded-lg border border-slate-200 shadow-md text-center relative">
+          {/* Annual Savings (after implementation) - Highlighted */}
+          <div className="p-6 bg-emerald-50 rounded-lg border-2 shadow-md text-center relative" style={{ borderColor: '#32BF84' }}>
             <div className="absolute -top-3 inset-x-0 flex justify-center">
-              <span className="inline-block px-3 py-1 text-xs font-semibold text-white rounded-full shadow-sm" style={{ backgroundColor: '#32BF84' }}>
+              <span
+                className="inline-block px-3 py-1 text-xs font-semibold text-white rounded-full shadow-sm"
+                style={{ backgroundColor: '#16a34a' }}
+              >
                 Net Annual Gain
               </span>
             </div>
-            <p className="mt-2 text-sm font-semibold mb-2 text-slate-700">Annual Savings</p>
-            <p className="text-3xl font-bold mb-2" style={{ color: '#32BF84' }}>
+            <p className="mt-2 text-sm font-semibold mb-2" style={{ color: '#166534' }}>
+              Annual Savings
+            </p>
+            <p className="text-3xl font-extrabold mb-2" style={{ color: '#16a34a' }}>
               {formatCurrency(adjustedAnnualSavings)}
             </p>
-            <p className="text-xs text-slate-500">You save this much (after implementation)</p>
+            <p className="text-xs font-semibold" style={{ color: '#166534' }}>
+              You save this much (after implementation)
+            </p>
           </div>
 
           {/* Breakeven Period Card */}
