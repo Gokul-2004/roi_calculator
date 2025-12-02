@@ -561,11 +561,11 @@ function CostBreakdownSection({
 
         {/* Big Savings Highlight */}
         <div className="mb-6 text-center">
-          <p className="text-lg font-bold" style={{ color: '#32BF84' }}>
+          <p className="text-xl font-bold" style={{ color: '#32BF84' }}>
             You could be saving {formatCurrency(adjustedAnnualSavings)} every year
           </p>
           {savingsPercent > 0 && (
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-sm text-slate-600 mt-1">
               That&apos;s roughly {savingsPercent.toFixed(1)}% of your current paper-based annual spend
             </p>
           )}
