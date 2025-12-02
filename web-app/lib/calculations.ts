@@ -63,8 +63,8 @@ export interface Benefits {
 export const COST_ASSUMPTIONS: CostAssumptions = {
   paper_cost_per_page: 0.1,
   storage_cost_per_doc: 2,
-  paper_time_per_doc: 10,
-  staff_hourly_cost: 200,
+  paper_time_per_doc: 15,
+  staff_hourly_cost: 120,
   document_loss_rate: 2,
   paper_compliance_cost: 100000,
   esig_time_per_doc: 2,

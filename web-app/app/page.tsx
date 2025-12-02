@@ -97,6 +97,13 @@ export default function Home() {
     localStorage.setItem('cookieConsent', 'declined');
     setShowCookieBanner(false);
   };
+  const handleReset = () => {
+    console.log('🔄 [Calculator] Resetting inputs and assumptions to defaults');
+    setInputs(DEFAULT_INPUTS);
+    setCostAssumptions(COST_ASSUMPTIONS);
+    setResults(null);
+  };
+
   const handleCalculate = async () => {
     console.log('🧮 [Calculator] Starting calculation...');
     console.log('   Input Parameters:', {
@@ -202,11 +209,11 @@ export default function Home() {
             </div>
             <div className="flex items-center gap-4">
               <button
-                onClick={handleCalculate}
+                onClick={handleReset}
                 className="hidden md:flex items-center gap-2 px-4 py-2 bg-[#32BF84] text-white border border-[#28A06A] rounded-full hover:bg-[#28A06A] transition-all duration-200 shadow-md hover:shadow-lg"
               >
                 <RefreshCw className="w-4 h-4" />
-                <span className="text-sm font-semibold">Refresh</span>
+                <span className="text-sm font-semibold">Reset</span>
               </button>
             </div>
           </div>
@@ -259,13 +266,6 @@ export default function Home() {
               label="Number of Signatories per Document"
               value={inputs.signatories_per_document}
               onChange={(v) => setInputs({ ...inputs, signatories_per_document: v })}
-              type="number"
-              step="0.5"
-            />
-            <InputField
-              label="Number of Staff Handling Documents"
-              value={inputs.staff_handling_documents}
-              onChange={(v) => setInputs({ ...inputs, staff_handling_documents: v })}
               type="number"
               step="1"
             />
@@ -358,13 +358,6 @@ export default function Home() {
               label="Number of Signatories per Document"
               value={inputs.signatories_per_document}
               onChange={(v) => setInputs({ ...inputs, signatories_per_document: v })}
-              type="number"
-              step="0.5"
-            />
-            <InputField
-              label="Number of Staff Handling Documents"
-              value={inputs.staff_handling_documents}
-              onChange={(v) => setInputs({ ...inputs, staff_handling_documents: v })}
               type="number"
               step="1"
             />
