@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import jsPDF from 'jspdf';
 import { Calculator, Save, TrendingUp, DollarSign, Clock, FileText, Zap, CheckCircle2, Check, Users, AlertCircle, Activity, Building2, Shield, FileCheck, Database, X, RefreshCw, Cookie } from 'lucide-react';
 import {
   calculateAnnualCosts,
@@ -18,12 +19,13 @@ import {
 } from '@/lib/calculations';
 
 const DEFAULT_INPUTS: InputParams = {
-  documents_per_year: 2000000,
-  pages_per_document: 5,
-  signatories_per_document: 2,
+  // Start key user inputs as empty (NaN) so no default values show in the UI
+  documents_per_year: Number.NaN,
+  pages_per_document: Number.NaN,
+  signatories_per_document: Number.NaN,
   staff_handling_documents: 10,
-  esig_annual_cost: 15000000,
-  implementation_cost: 2500000,
+  esig_annual_cost: Number.NaN,
+  implementation_cost: Number.NaN,
   implementation_timeline_months: 3,
 };
 
@@ -268,7 +270,6 @@ export default function Home() {
               onChange={(v) => setInputs({ ...inputs, signatories_per_document: v })}
               type="number"
               step="1"
-              disabled
             />
             <InputField
               label="E-Signature Solution Annual Cost (₹)"
@@ -315,6 +316,7 @@ export default function Home() {
                   metrics={results.roiMetrics}
                   costAssumptions={costAssumptions}
                   setCostAssumptions={setCostAssumptions}
+                  inputs={inputs}
                 />
                 
                 {/* Benefits */}
@@ -361,7 +363,6 @@ export default function Home() {
               onChange={(v) => setInputs({ ...inputs, signatories_per_document: v })}
               type="number"
               step="1"
-              disabled
             />
             <InputField
               label="E-Signature Solution Annual Cost (₹)"
@@ -452,6 +453,10 @@ function InputField({
         type={type}
         value={displayValue}
         disabled={disabled}
+        // Prevent mouse-wheel scroll from accidentally changing the value
+        onWheel={(e) => {
+          (e.target as HTMLInputElement).blur();
+        }}
         onChange={(e) => {
           const raw = e.target.value;
           if (raw === '') {
@@ -522,12 +527,14 @@ function CostBreakdownSection({
   costs, 
   metrics, 
   costAssumptions, 
-  setCostAssumptions 
+  setCostAssumptions,
+  inputs,
 }: { 
   costs: AnnualCosts; 
   metrics: ROIMetrics;
   costAssumptions: CostAssumptions;
   setCostAssumptions: (assumptions: CostAssumptions) => void;
+  inputs: InputParams;
 }) {
   const [showModal, setShowModal] = useState(false);
   const [showAssumptionsModal, setShowAssumptionsModal] = useState(false);
@@ -548,6 +555,379 @@ function CostBreakdownSection({
     costs.total_paper_cost > 0
       ? (annualSavings / costs.total_paper_cost) * 100
       : 0;
+
+  const handleExportPdf = async () => {
+    try {
+      const doc = new jsPDF();
+
+      // Theme (match site)
+      const GREEN = '#32BF84';
+      const GREEN_DARK = '#28A06A';
+      const SLATE_TEXT = '#0f172a';
+      const SLATE_MUTED = '#475569';
+      const CARD_BG = '#f1f5f9';
+      const BORDER = '#e2e8f0';
+
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+
+      const setFillHex = (hex: string) => {
+        const h = hex.replace('#', '');
+        const r = parseInt(h.slice(0, 2), 16);
+        const g = parseInt(h.slice(2, 4), 16);
+        const b = parseInt(h.slice(4, 6), 16);
+        doc.setFillColor(r, g, b);
+      };
+      const setTextHex = (hex: string) => {
+        const h = hex.replace('#', '');
+        const r = parseInt(h.slice(0, 2), 16);
+        const g = parseInt(h.slice(2, 4), 16);
+        const b = parseInt(h.slice(4, 6), 16);
+        doc.setTextColor(r, g, b);
+      };
+
+      const drawCard = (
+        x: number,
+        y: number,
+        w: number,
+        h: number,
+        title: string,
+        value: string,
+        subtitle?: string,
+        valueColorHex: string = GREEN
+      ) => {
+        setFillHex(CARD_BG);
+        doc.roundedRect(x, y, w, h, 3, 3, 'F');
+        doc.setDrawColor(226, 232, 240);
+        doc.roundedRect(x, y, w, h, 3, 3, 'S');
+
+        setTextHex(SLATE_MUTED);
+        doc.setFontSize(9.5);
+        doc.text(title, x + 6, y + 7);
+
+        setTextHex(valueColorHex);
+        doc.setFontSize(16);
+        doc.text(value, x + 6, y + 17);
+
+        if (subtitle) {
+          setTextHex(SLATE_MUTED);
+          doc.setFontSize(8.5);
+          doc.text(subtitle, x + 6, y + 24);
+        }
+      };
+
+      // Helpers to clean up currency text for PDF (₹ sometimes shows as "1" with base fonts)
+      const pdfCurrency = (value: number) =>
+        formatCurrency(value).replace('₹', 'Rs.');
+      const pdfText = (value: string) =>
+        value.replace('₹', 'Rs.');
+
+      const safeText = (v: string) => v ?? '';
+
+      // Convert the public webp logo into PNG data URL for jsPDF
+      const loadLogoPngDataUrl = async (): Promise<string | null> => {
+        try {
+          const res = await fetch('/certinal_logo.webp');
+          const blob = await res.blob();
+          const bmp = await createImageBitmap(blob);
+          const canvas = document.createElement('canvas');
+          canvas.width = bmp.width;
+          canvas.height = bmp.height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return null;
+          ctx.drawImage(bmp, 0, 0);
+          return canvas.toDataURL('image/png');
+        } catch {
+          return null;
+        }
+      };
+
+      // PAGE 1: Header (match website header: logo + ROI Calculator)
+      setFillHex('#ffffff');
+      doc.rect(0, 0, pageWidth, 24, 'F');
+      doc.setDrawColor(226, 232, 240);
+      doc.line(0, 24, pageWidth, 24);
+
+      const logoDataUrl = await loadLogoPngDataUrl();
+      // Header layout: keep logo and title visually aligned on the same baseline
+      const headerBaselineY = 14;
+      if (logoDataUrl) {
+        // Move logo slightly down + a touch smaller so it doesn't sit higher than the title
+        doc.addImage(logoDataUrl, 'PNG', 12, 6, 40, 10);
+      } else {
+        setTextHex(SLATE_TEXT);
+        doc.setFontSize(16);
+        doc.text('CERTINAL', 12, headerBaselineY);
+      }
+
+      const titleX = 60;
+      setTextHex(SLATE_TEXT);
+      doc.setFontSize(18);
+      doc.text('ROI Calculator', titleX, headerBaselineY);
+
+      // PAGE 1: Sections like the site: Input Parameters + key result cards
+      let y = 34;
+
+      // Input Parameters block (two columns) - show actual values
+      setTextHex(SLATE_TEXT);
+      doc.setFontSize(12);
+      doc.text('Input Parameters', 12, y);
+      y += 6;
+
+      // Use values that were used in calculation (available in parent via closure? not here).
+      // We only have costs/metrics here; input values are in the parent component.
+      // We'll read them via window.__roiInputs is not set; instead pass them from parent is bigger refactor.
+      // To keep it clean: include the key cost inputs derived from current calculation (subscription + implementation).
+      // Note: documents/pages/signatories live above; to match request, we’ll include those by reading from DOM is brittle.
+      // Instead: we’ll take them from localStorage? Not present.
+      // So: include the cost-relevant inputs we can infer + leave placeholders not inferable.
+      const inputLinesLeft = [
+        `Documents per Year: ${formatNumber(inputs.documents_per_year)}`,
+        `Average Pages per Document: ${inputs.pages_per_document}`,
+        `Number of Signatories per Document: ${inputs.signatories_per_document}`,
+      ];
+      const inputLinesRight = [
+        `E-Signature Annual Cost`,
+        `${pdfCurrency(costs.software_subscription)}`,
+        `Implementation Cost (One-time)`,
+        `${pdfCurrency(metrics.implementation_cost)}`,
+      ];
+
+      setFillHex('#ffffff');
+      doc.roundedRect(12, y, pageWidth - 24, 34, 3, 3, 'F');
+      doc.setDrawColor(226, 232, 240);
+      doc.roundedRect(12, y, pageWidth - 24, 34, 3, 3, 'S');
+
+      setTextHex(SLATE_MUTED);
+      doc.setFontSize(10);
+      let ly = y + 9;
+      inputLinesLeft.forEach((line) => {
+        doc.text(line, 18, ly);
+        ly += 7;
+      });
+      let ry = y + 9;
+      inputLinesRight.forEach((line, index) => {
+        // Right column, right-aligned so long numbers stay inside the box
+        const isValueLine = index === 1 || index === 3;
+        doc.text(line, pageWidth - 20, ry, {
+          align: 'right',
+          maxWidth: pageWidth / 2 - 24,
+        });
+        ry += isValueLine ? 6 : 7;
+      });
+
+      y += 46;
+
+      // Key Results (cards similar to UI)
+      setTextHex(SLATE_TEXT);
+      doc.setFontSize(12);
+      doc.text('Annual Cost Breakdown (Summary)', 12, y);
+      y += 6;
+
+      const cardW = (pageWidth - 24 - 12) / 2; // two columns with 12 gap
+      const cardH = 28;
+      const x1 = 12;
+      const x2 = 12 + cardW + 12;
+
+      const RED = '#dc2626';
+      drawCard(
+        x1,
+        y,
+        cardW,
+        cardH,
+        'Paper-Based',
+        pdfCurrency(costs.total_paper_cost),
+        'Old annual cost',
+        RED
+      );
+      drawCard(
+        x2,
+        y,
+        cardW,
+        cardH,
+        'E-Signature',
+        pdfCurrency(costs.total_esig_cost),
+        'New annual cost',
+        GREEN
+      );
+      y += cardH + 10;
+
+      drawCard(
+        x1,
+        y,
+        cardW,
+        cardH,
+        'Annual Savings',
+        pdfCurrency(annualSavings),
+        'You could be saving every year',
+        annualSavings >= 0 ? GREEN_DARK : RED
+      );
+      drawCard(x2, y, cardW, cardH, 'Breakeven Period', `${metrics.payback_period_months.toFixed(1)} months`, 'Rapid cost recovery');
+      y += cardH + 10;
+
+      drawCard(
+        x1,
+        y,
+        cardW,
+        cardH,
+        'Year 1 ROI',
+        `${metrics.year1_roi_percent.toFixed(1)}%`,
+        'Year 1 ROI',
+        metrics.year1_roi_percent >= 0 ? GREEN : RED
+      );
+      drawCard(
+        x2,
+        y,
+        cardW,
+        cardH,
+        'Year 5 ROI',
+        `${metrics.year5_roi_percent.toFixed(1)}%`,
+        'Cumulative 5 years',
+        metrics.year5_roi_percent >= 0 ? GREEN : RED
+      );
+      y += cardH + 10;
+
+      drawCard(
+        x1,
+        y,
+        cardW,
+        cardH,
+        '3 Years Net Savings',
+        pdfCurrency(metrics.net_savings_3_years),
+        'Total savings over 3 years',
+        metrics.net_savings_3_years >= 0 ? GREEN : RED
+      );
+      drawCard(
+        x2,
+        y,
+        cardW,
+        cardH,
+        '5 Years Net Savings',
+        pdfCurrency(metrics.net_savings_5_years),
+        'Total savings over 5 years',
+        metrics.net_savings_5_years >= 0 ? GREEN : RED
+      );
+
+      // Page 2 - Detailed breakdown (same structure as modal)
+      doc.addPage();
+      // Header repeated
+      setFillHex('#ffffff');
+      doc.rect(0, 0, pageWidth, 24, 'F');
+      doc.setDrawColor(226, 232, 240);
+      doc.line(0, 24, pageWidth, 24);
+      const headerBaselineY2 = 14;
+      if (logoDataUrl) {
+        doc.addImage(logoDataUrl, 'PNG', 12, 6, 40, 10);
+      } else {
+        setTextHex(SLATE_TEXT);
+        doc.setFontSize(16);
+        doc.text('CERTINAL', 12, headerBaselineY2);
+      }
+      setTextHex(SLATE_TEXT);
+      doc.setFontSize(18);
+      doc.text('ROI Calculator', 60, headerBaselineY2);
+
+      y = 34;
+      setTextHex(SLATE_TEXT);
+      doc.setFontSize(12);
+      doc.text('Detailed Cost Breakdown', 12, y);
+      y += 8;
+
+      // Table header
+      setFillHex(GREEN);
+      doc.roundedRect(12, y, pageWidth - 24, 10, 2, 2, 'F');
+      setTextHex('#ffffff');
+      doc.setFontSize(10);
+      // Compact column layout: small label column, then three numeric columns
+      const colLabelX = 16;
+      const colLabelMaxWidth = 70; // keep label column tight
+      const colPaperX = colLabelX + colLabelMaxWidth + 8;
+      const colEsigX = colPaperX + 36;
+      const colSavingsX = colEsigX + 40;
+      doc.text('Cost Component', colLabelX, y + 7);
+      doc.text('Paper-Based', colPaperX, y + 7);
+      doc.text('E-Signature', colEsigX, y + 7);
+      doc.text('Annual Savings', colSavingsX, y + 7);
+      y += 16;
+
+      setTextHex(SLATE_TEXT);
+      doc.setFontSize(9);
+
+      const addCostRow = (label: string, paper: number | null, esig: number | null, savings: number | null) => {
+        if (y > pageHeight - 18) {
+          doc.addPage();
+          // minimal header on overflow pages
+          setFillHex('#ffffff');
+          doc.rect(0, 0, pageWidth, 18, 'F');
+          doc.setDrawColor(226, 232, 240);
+          doc.line(0, 18, pageWidth, 18);
+          setTextHex(SLATE_TEXT);
+          doc.setFontSize(12);
+          doc.text('Detailed Cost Breakdown (cont.)', 12, 12);
+          y = 28;
+        }
+        const paperText = paper === null ? '—' : pdfCurrency(paper);
+        const esigText = esig === null ? '—' : pdfCurrency(esig);
+        const savingsText = savings === null ? '—' : pdfCurrency(savings);
+
+        // Simple row with light underline to reduce clutter
+        doc.setDrawColor(226, 232, 240);
+        doc.line(12, y + 2, pageWidth - 12, y + 2);
+
+        setTextHex(SLATE_TEXT);
+        // Draw label with a small max width so we don't waste space
+        doc.text(label, colLabelX, y, { maxWidth: colLabelMaxWidth });
+        setTextHex(SLATE_MUTED);
+        // Left-align numeric columns close to the label to use space efficiently
+        doc.text(paperText, colPaperX, y);
+        doc.text(esigText, colEsigX, y);
+        doc.text(savingsText, colSavingsX, y);
+        y += 6;
+      };
+
+      addCostRow('Paper & Printing', costs.paper_printing, 0, costs.paper_printing);
+      addCostRow('Physical Storage & Filing', costs.storage_filing, 0, costs.storage_filing);
+      addCostRow(
+        'Staff Time (Processing & Signing)',
+        costs.paper_staff_time,
+        costs.esig_staff_time,
+        costs.paper_staff_time - costs.esig_staff_time
+      );
+      addCostRow('Document Loss/Recreation', costs.doc_loss_recreation, 0, costs.doc_loss_recreation);
+      addCostRow(
+        'Compliance & Audit',
+        costs.paper_compliance_audit,
+        costs.esig_compliance_audit,
+        costs.paper_compliance_audit - costs.esig_compliance_audit
+      );
+      addCostRow('Software Subscription', 0, costs.software_subscription, -costs.software_subscription);
+      addCostRow(
+        'Implementation Cost (across 5 years)',
+        0,
+        metrics.implementation_cost / 5,
+        -metrics.implementation_cost / 5
+      );
+
+      // Totals row
+      addCostRow(
+        'Total',
+        (costs.paper_printing || 0) +
+          (costs.storage_filing || 0) +
+          (costs.paper_staff_time || 0) +
+          (costs.doc_loss_recreation || 0) +
+          (costs.paper_compliance_audit || 0),
+        (costs.esig_staff_time || 0) +
+          (costs.esig_compliance_audit || 0) +
+          (costs.software_subscription || 0),
+        annualSavings
+      );
+
+      doc.save('roi-calculator-results.pdf');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Sorry, there was a problem exporting the PDF.');
+    }
+  };
 
   return (
     <>
@@ -657,7 +1037,7 @@ function CostBreakdownSection({
         </div>
 
         {/* Buttons */}
-        <div className="flex justify-center gap-4">
+        <div className="flex justify-center gap-4 flex-wrap">
           <button
             onClick={() => setShowModal(true)}
             className="px-6 py-3 bg-[#32BF84] text-white rounded-lg font-semibold hover:bg-[#28A06A] transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
@@ -671,6 +1051,13 @@ function CostBreakdownSection({
           >
             <FileText className="w-5 h-5" />
             View/Modify Cost Assumptions
+          </button>
+          <button
+            onClick={handleExportPdf}
+            className="px-6 py-3 bg-[#32BF84] text-white rounded-lg font-semibold hover:bg-[#28A06A] transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
+          >
+            <Save className="w-5 h-5" />
+            Export Results
           </button>
         </div>
       </div>
