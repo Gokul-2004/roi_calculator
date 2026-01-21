@@ -602,8 +602,10 @@ function CostBreakdownSection({
         doc.roundedRect(x, y, w, h, 3, 3, 'S');
 
         setTextHex(SLATE_MUTED);
-        doc.setFontSize(9.5);
+        doc.setFontSize(10.5);
+        doc.setFont('helvetica', 'bold');
         doc.text(title, x + 6, y + 7);
+        doc.setFont('helvetica', 'normal');
 
         setTextHex(valueColorHex);
         doc.setFontSize(16);
@@ -671,7 +673,9 @@ function CostBreakdownSection({
       // Input Parameters block (two columns) - show actual values
       setTextHex(SLATE_TEXT);
       doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
       doc.text('Input Parameters', 12, y);
+      doc.setFont('helvetica', 'normal');
       y += 6;
 
       // Use values that were used in calculation (available in parent via closure? not here).
@@ -721,7 +725,9 @@ function CostBreakdownSection({
       // Key Results (cards similar to UI)
       setTextHex(SLATE_TEXT);
       doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
       doc.text('Annual Cost Breakdown (Summary)', 12, y);
+      doc.setFont('helvetica', 'normal');
       y += 6;
 
       const cardW = (pageWidth - 24 - 12) / 2; // two columns with 12 gap
@@ -830,30 +836,34 @@ function CostBreakdownSection({
       y = 34;
       setTextHex(SLATE_TEXT);
       doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
       doc.text('Detailed Cost Breakdown', 12, y);
+      doc.setFont('helvetica', 'normal');
       y += 8;
 
       // Table header
       setFillHex(GREEN);
       doc.roundedRect(12, y, pageWidth - 24, 10, 2, 2, 'F');
       setTextHex('#ffffff');
-      doc.setFontSize(10);
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
       // Compact column layout: small label column, then three numeric columns
       const colLabelX = 16;
-      const colLabelMaxWidth = 70; // keep label column tight
-      const colPaperX = colLabelX + colLabelMaxWidth + 8;
-      const colEsigX = colPaperX + 36;
-      const colSavingsX = colEsigX + 40;
+      const colLabelMaxWidth = 65; // keep label column tighter
+      const colPaperX = colLabelX + colLabelMaxWidth + 6;
+      const colEsigX = colPaperX + 38;
+      const colSavingsX = colEsigX + 42;
       doc.text('Cost Component', colLabelX, y + 7);
       doc.text('Paper-Based', colPaperX, y + 7);
       doc.text('E-Signature', colEsigX, y + 7);
       doc.text('Annual Savings', colSavingsX, y + 7);
+      doc.setFont('helvetica', 'normal');
       y += 16;
 
       setTextHex(SLATE_TEXT);
       doc.setFontSize(9);
 
-      const addCostRow = (label: string, paper: number | null, esig: number | null, savings: number | null) => {
+      const addCostRow = (label: string, paper: number | null, esig: number | null, savings: number | null, bold: boolean = false, fontSize: number = 9) => {
         if (y > pageHeight - 18) {
           doc.addPage();
           // minimal header on overflow pages
@@ -863,7 +873,9 @@ function CostBreakdownSection({
           doc.line(0, 18, pageWidth, 18);
           setTextHex(SLATE_TEXT);
           doc.setFontSize(12);
+          doc.setFont('helvetica', 'bold');
           doc.text('Detailed Cost Breakdown (cont.)', 12, 12);
+          doc.setFont('helvetica', 'normal');
           y = 28;
         }
         const paperText = paper === null ? '—' : pdfCurrency(paper);
@@ -874,6 +886,10 @@ function CostBreakdownSection({
         doc.setDrawColor(226, 232, 240);
         doc.line(12, y + 2, pageWidth - 12, y + 2);
 
+        doc.setFontSize(fontSize);
+        if (bold) {
+          doc.setFont('helvetica', 'bold');
+        }
         setTextHex(SLATE_TEXT);
         // Draw label with a small max width so we don't waste space
         doc.text(label, colLabelX, y, { maxWidth: colLabelMaxWidth });
@@ -882,6 +898,10 @@ function CostBreakdownSection({
         doc.text(paperText, colPaperX, y);
         doc.text(esigText, colEsigX, y);
         doc.text(savingsText, colSavingsX, y);
+        if (bold) {
+          doc.setFont('helvetica', 'normal');
+        }
+        doc.setFontSize(9);
         y += 6;
       };
 
@@ -919,7 +939,9 @@ function CostBreakdownSection({
         (costs.esig_staff_time || 0) +
           (costs.esig_compliance_audit || 0) +
           (costs.software_subscription || 0),
-        annualSavings
+        annualSavings,
+        true,
+        10.5
       );
 
       // Assumptions Table (after some spacing)
@@ -930,19 +952,23 @@ function CostBreakdownSection({
       }
       setTextHex(SLATE_TEXT);
       doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
       doc.text('Cost Assumptions', 12, y);
+      doc.setFont('helvetica', 'normal');
       y += 8;
 
       // Assumptions table header
       setFillHex(GREEN);
       doc.roundedRect(12, y, pageWidth - 24, 10, 2, 2, 'F');
       setTextHex('#ffffff');
-      doc.setFontSize(10);
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
       const colAssumpValueX = 120;
       const colAssumpUnitX = 170;
       doc.text('Cost Component', 16, y + 7);
       doc.text('Value', colAssumpValueX, y + 7);
       doc.text('Unit', colAssumpUnitX, y + 7);
+      doc.setFont('helvetica', 'normal');
       y += 14;
 
       const assumptionsList = [
@@ -1004,7 +1030,9 @@ function CostBreakdownSection({
           y = 20;
           setTextHex(SLATE_TEXT);
           doc.setFontSize(12);
+          doc.setFont('helvetica', 'bold');
           doc.text('Cost Assumptions (cont.)', 12, y);
+          doc.setFont('helvetica', 'normal');
           y += 8;
         }
         const val = (costAssumptions as any)[item.key] as number | null;
@@ -1018,6 +1046,63 @@ function CostBreakdownSection({
         setTextHex(SLATE_MUTED);
         doc.text(formattedVal, colAssumpValueX, y);
         doc.text(item.unit, colAssumpUnitX, y);
+        y += 7;
+      });
+
+      // Annual Benefits (Non-Financial) section - Start on new page
+      doc.addPage();
+      y = 20;
+      setTextHex(SLATE_TEXT);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Annual Benefits (Non-Financial)', 12, y);
+      doc.setFont('helvetica', 'normal');
+      y += 10;
+
+      const pagesSaved = (inputs.documents_per_year || 0) * (inputs.pages_per_document || 0);
+      const benefits_list = [
+        { title: 'Instant Document Signing', desc: 'Zero waiting time for approvals at admission/discharge kiosks.' },
+        { title: 'Pages Saved Annually', desc: `${formatNumber(pagesSaved)} pages saved. Reduced paper & environmental impact.` },
+        { title: 'Compliance & Audit Trail', desc: '100% digital audit trail. NABH, ABDM compliance.' },
+        { title: 'Reduced Staff Burden', desc: '5 min vs 15 min per document. More time for patient care.' },
+        { title: 'Error Reduction', desc: 'No lost signatures or missing approvals.' },
+        { title: 'Patient Experience', desc: 'Faster onboarding and discharge. Enhanced patient satisfaction.' },
+        { title: 'EMR Seamless Integration', desc: 'Real-time EMR sync. Eliminates manual data entry errors.' },
+        { title: 'Reduced Hospital Congestion', desc: 'Faster document processing. Reduces waiting times.' },
+        { title: 'Indian Evidence Act Compliance', desc: 'Compliant with Section 3A. Legally valid & admissible.' },
+        { title: 'IT Act 2000 Compliance', desc: 'IT Act Section 5 compliant. Valid alternate to paper documents.' },
+        { title: 'DPDP Compliance Ready', desc: 'Full audit trail + data residency. Reduced regulatory risks.' }
+      ];
+
+      benefits_list.forEach((benefit) => {
+        if (y > pageHeight - 24) {
+          doc.addPage();
+          y = 20;
+          setTextHex(SLATE_TEXT);
+          doc.setFontSize(12);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Annual Benefits (Non-Financial) (cont.)', 12, y);
+          doc.setFont('helvetica', 'normal');
+          y += 10;
+        }
+
+        // Checkmark bullet (using a green circle)
+        setFillHex(GREEN);
+        doc.circle(14, y - 1.5, 1.5, 'F');
+
+        // Title in bold on first line
+        setTextHex(SLATE_TEXT);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        doc.text(benefit.title + ':', 20, y);
+        doc.setFont('helvetica', 'normal');
+        y += 5;
+
+        // Description on second line, indented
+        setTextHex(SLATE_MUTED);
+        doc.setFontSize(8.5);
+        doc.text(benefit.desc, 20, y, { maxWidth: pageWidth - 32 });
+
         y += 7;
       });
 
@@ -1191,11 +1276,11 @@ function CostBreakdownSection({
             {/* Modal Content */}
             <div className="p-6">
               <div className="space-y-3">
-                <div className="grid grid-cols-4 gap-4 p-4 bg-slate-100 rounded-lg font-semibold text-sm text-slate-800 border border-slate-200">
-                  <div>Cost Component</div>
-                  <div className="text-right">Paper-Based (₹)</div>
-                  <div className="text-right">E-Signature (₹)</div>
-                  <div className="text-right">Annual Savings (₹)</div>
+                <div className="grid grid-cols-4 gap-4 p-4 bg-slate-100 rounded-lg text-sm text-slate-800 border border-slate-200">
+                  <div className="font-bold">Cost Component</div>
+                  <div className="text-right font-bold">Paper-Based (₹)</div>
+                  <div className="text-right font-bold">E-Signature (₹)</div>
+                  <div className="text-right font-bold">Annual Savings (₹)</div>
                 </div>
                 <CostItem
                   label="Paper & Printing"
@@ -1255,6 +1340,7 @@ function CostBreakdownSection({
                     (costs.software_subscription || 0)
                   }
                   savings={annualSavings}
+                  isTotal={true}
                 />
               </div>
             </div>
@@ -1311,11 +1397,11 @@ function CostBreakdownSection({
                 )}
               </div>
               <div className="border border-slate-200 rounded-lg overflow-hidden mb-6">
-                <div className="grid grid-cols-4 gap-4 bg-slate-100 px-4 py-3 text-xs font-semibold text-slate-700">
-                  <div>Cost Component</div>
-                  <div className="text-right">Value</div>
-                  <div className="text-center">Unit</div>
-                  <div>Notes</div>
+                <div className="grid grid-cols-4 gap-4 bg-slate-100 px-4 py-3 text-xs text-slate-700">
+                  <div className="font-bold">Cost Component</div>
+                  <div className="text-right font-bold">Value</div>
+                  <div className="text-center font-bold">Unit</div>
+                  <div className="font-bold">Notes</div>
                 </div>
                 <div className="divide-y divide-slate-200">
                   {[
@@ -1525,11 +1611,11 @@ function AssumptionsSection() {
         Industry benchmarks tailored for Indian healthcare. Values are protected to maintain consistency.
       </p>
       <div className="border border-slate-200 rounded-lg overflow-hidden">
-        <div className="grid grid-cols-4 gap-4 bg-slate-100 px-4 py-3 text-xs font-semibold text-slate-700">
-          <div>Cost Component</div>
-          <div className="text-right">Value</div>
-          <div className="text-center">Unit</div>
-          <div>Notes</div>
+        <div className="grid grid-cols-4 gap-4 bg-slate-100 px-4 py-3 text-xs text-slate-700">
+          <div className="font-bold">Cost Component</div>
+          <div className="text-right font-bold">Value</div>
+          <div className="text-center font-bold">Unit</div>
+          <div className="font-bold">Notes</div>
         </div>
         <div className="divide-y divide-slate-200">
           {items.map((item) => (
@@ -1556,11 +1642,13 @@ function CostItem({
   paper,
   esig,
   savings,
+  isTotal = false,
 }: {
   label: string;
   paper: number | null;
   esig: number | null;
   savings: number | null;
+  isTotal?: boolean;
 }) {
   const formatValue = (value: number | null) =>
     value === null ? '—' : formatCurrency(value);
@@ -1573,9 +1661,9 @@ function CostItem({
 
   return (
     <div className="grid grid-cols-4 gap-4 p-5 bg-white border border-slate-200 rounded-lg items-center hover:border-slate-300 hover:shadow-sm transition-all duration-200">
-      <div className="font-semibold text-slate-900">{label}</div>
-      <div className="text-slate-700 text-right font-semibold">{formatValue(paper)}</div>
-      <div className="text-slate-700 text-right font-semibold">{formatValue(esig)}</div>
+      <div className={isTotal ? "font-bold text-slate-900" : "font-semibold text-slate-900"}>{label}</div>
+      <div className={isTotal ? "text-slate-700 text-right font-bold" : "text-slate-700 text-right font-semibold"}>{formatValue(paper)}</div>
+      <div className={isTotal ? "text-slate-700 text-right font-bold" : "text-slate-700 text-right font-semibold"}>{formatValue(esig)}</div>
       <div className={`text-right font-bold text-lg ${savingsClass}`}>
         {savings === null ? '—' : formatCurrency(savings)}
       </div>
