@@ -922,7 +922,106 @@ function CostBreakdownSection({
         annualSavings
       );
 
-      doc.save('roi-calculator-results.pdf');
+      // Assumptions Table (after some spacing)
+      y += 16;
+      if (y > pageHeight - 40) {
+        doc.addPage();
+        y = 20;
+      }
+      setTextHex(SLATE_TEXT);
+      doc.setFontSize(12);
+      doc.text('Cost Assumptions', 12, y);
+      y += 8;
+
+      // Assumptions table header
+      setFillHex(GREEN);
+      doc.roundedRect(12, y, pageWidth - 24, 10, 2, 2, 'F');
+      setTextHex('#ffffff');
+      doc.setFontSize(10);
+      const colAssumpValueX = 120;
+      const colAssumpUnitX = 170;
+      doc.text('Cost Component', 16, y + 7);
+      doc.text('Value', colAssumpValueX, y + 7);
+      doc.text('Unit', colAssumpUnitX, y + 7);
+      y += 14;
+
+      const assumptionsList = [
+        {
+          label: 'Paper Cost per Page',
+          key: 'paper_cost_per_page' as const,
+          unit: '₹',
+          format: (v: number | null) => (v === null ? '—' : pdfCurrency(v)),
+        },
+        {
+          label: 'Storage Cost per Document per Year',
+          key: 'storage_cost_per_doc' as const,
+          unit: '₹',
+          format: (v: number | null) => (v === null ? '—' : pdfCurrency(v)),
+        },
+        {
+          label: 'Staff Time per Document (Paper)',
+          key: 'paper_time_per_doc' as const,
+          unit: 'minutes',
+          format: (v: number | null) => (v === null ? '—' : `${v.toFixed(2)} min`),
+        },
+        {
+          label: 'Average Staff Hourly Cost',
+          key: 'staff_hourly_cost' as const,
+          unit: '₹',
+          format: (v: number | null) => (v === null ? '—' : pdfCurrency(v)),
+        },
+        {
+          label: 'Document Loss/Re-creation Rate',
+          key: 'document_loss_rate' as const,
+          unit: '%',
+          format: (v: number | null) => (v === null ? '—' : `${v.toFixed(2)}%`),
+        },
+        {
+          label: 'Compliance Audit Cost per Year (Paper)',
+          key: 'paper_compliance_cost' as const,
+          unit: '₹',
+          format: (v: number | null) => (v === null ? '—' : pdfCurrency(v)),
+        },
+        {
+          label: 'E-Signature Staff Time per Document',
+          key: 'esig_time_per_doc' as const,
+          unit: 'minutes',
+          format: (v: number | null) => (v === null ? '—' : `${v.toFixed(2)} min`),
+        },
+        {
+          label: 'E-Signature Compliance Cost per Year',
+          key: 'esig_compliance_cost' as const,
+          unit: '₹',
+          format: (v: number | null) => (v === null ? '—' : pdfCurrency(v)),
+        },
+      ];
+
+      setTextHex(SLATE_TEXT);
+      doc.setFontSize(9);
+      assumptionsList.forEach((item) => {
+        if (y > pageHeight - 16) {
+          doc.addPage();
+          y = 20;
+          setTextHex(SLATE_TEXT);
+          doc.setFontSize(12);
+          doc.text('Cost Assumptions (cont.)', 12, y);
+          y += 8;
+        }
+        const val = (costAssumptions as any)[item.key] as number | null;
+        const formattedVal = item.format(val);
+
+        doc.setDrawColor(226, 232, 240);
+        doc.line(12, y + 2, pageWidth - 12, y + 2);
+
+        setTextHex(SLATE_TEXT);
+        doc.text(item.label, 16, y, { maxWidth: 90 });
+        setTextHex(SLATE_MUTED);
+        doc.text(formattedVal, colAssumpValueX, y);
+        doc.text(item.unit, colAssumpUnitX, y);
+        y += 7;
+      });
+
+      doc.save('Certinal_e-sign_ROI_Calculation.pdf');
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Sorry, there was a problem exporting the PDF.');
